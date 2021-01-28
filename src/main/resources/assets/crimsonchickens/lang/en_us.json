@@ -1,0 +1,23 @@
+{
+  "itemGroup.crimsonchickens": "Crimson's Chicken Resources",
+
+  "entity.crimsonchickens.bone_chicken": "Bonemeal Chicken",
+  "entity.crimsonchickens.lapis_chicken": "Lapis Chicken",
+  "entity.crimsonchickens.coal_chicken": "Coal Chicken",
+  "entity.crimsonchickens.iron_chicken": "Iron Chicken",
+  "entity.crimsonchickens.redstone_chicken": "Redstone Chicken",
+  "entity.crimsonchickens.glowstone_chicken": "Glowstone Chicken",
+
+  "entity.crimsonchickens.oak_chicken": "Oak Log Chicken",
+  "entity.crimsonchickens.birch": "Birch Log Chicken",
+  "entity.crimsonchickens.acacia_chicken": "Acacia Log Chicken",
+  "entity.crimsonchickens.darkoak_chicken": "Dark Oak Log Chicken",
+  "entity.crimsonchickens.spruce_chicken": "Spruce Log Chicken",
+
+  "item.crimsonchickens.bone_chicken_spawn_egg": "Bonemeal Chicken Spawn Egg",
+  "item.crimsonchickens.lapis_chicken_spawn_egg": "Lapis Chicken Spawn Egg",
+  "item.crimsonchickens.coal_chicken_spawn_egg": "Coal Chicken Spawn Egg",
+  "item.crimsonchickens.iron_chicken_spawn_egg": "Iron Chicken Spawn Egg",
+  "item.crimsonchickens.redstone_chicken_spawn_egg": "Redstone Chicken Spawn Egg",
+  "item.crimsonchickens.glowstone_chicken_spawn_egg": "Glowstone Chicken Spawn Egg"
+}
