@@ -34,15 +34,35 @@ public class Serializers {
             mt.eggLayTime = obj.get("eggLayTime").getAsInt();
             mt.canBreed = obj.get("canBreed").getAsBoolean();
             mt.dropItemItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(obj.get("dropItem").getAsString()));
-            try {
-                mt.dropItemNBT = new JsonToNBT(new StringReader(obj.get("dropItemNBT").getAsString())).readStruct();
-            } catch (CommandSyntaxException e) {
-                e.printStackTrace();
+            String st = obj.get("dropItemNBT").getAsString();
+            if (st.length() != 0) {
+                try {
+                    mt.dropItemNBT = new JsonToNBT(new StringReader(st)).readStruct();
+                } catch (CommandSyntaxException e) {
+                    e.printStackTrace();
+                }
             }
             mt.baseHealth = obj.get("baseHealth").getAsDouble();
             mt.baseSpeed = obj.get("baseSpeed").getAsDouble();
             mt.isFireImmune = obj.get("isFireImmune").getAsBoolean();
             mt.conversion = obj.get("conversion").getAsInt();
+            mt.eggPrimaryColor = obj.get("eggColorForeground").getAsInt();
+            mt.eggSecondaryColor = obj.get("eggColorBackground").getAsInt();
+            mt.hasTrait = obj.get("hasTrait").getAsInt();
+
+            JsonElement element;
+            element = obj.get("biomesWhitelist");
+            if (element != null) mt.biomesWhitelist = element.getAsJsonArray();
+
+            element = obj.get("biomesBlacklist");
+            if (element != null) mt.biomesBlacklist = element.getAsJsonArray();
+
+            mt.spawnNaturally = obj.get("spawnNaturally").getAsBoolean();
+            mt.spawnType = obj.get("spawnType").getAsInt();
+            mt.spawnWeight = obj.get("spawnWeight").getAsInt();
+
+            mt.parentA = obj.get("parentA").getAsString();
+            mt.parentB = obj.get("parentB").getAsString();
 
             return mt;
         }
@@ -52,16 +72,30 @@ public class Serializers {
             JsonObject obj = new JsonObject();
 
             obj.addProperty("displayName", src.displayName);
-            if (src.dropItemItem.getItem() == Items.AIR)
-                obj.addProperty("dropItem", "");
-            else
-                obj.addProperty("dropItem", src.dropItemItem.getRegistryName().toString());
+            obj.addProperty("dropItem", src.dropItemItem.getItem() == Items.AIR ? "" : src.dropItemItem.getRegistryName().toString());
+            obj.addProperty("dropItemNBT", src.dropItemNBT == null ? "" : src.dropItemNBT.toString());
             obj.addProperty("eggLayTime", src.eggLayTime);
             obj.addProperty("canBreed", src.canBreed);
             obj.addProperty("baseHealth", src.baseHealth);
             obj.addProperty("baseSpeed", src.baseSpeed);
             obj.addProperty("isFireImmune", src.isFireImmune);
             obj.addProperty("conversion", src.conversion);
+            obj.addProperty("eggColorForeground", src.eggPrimaryColor);
+            obj.addProperty("eggColorBackground", src.eggSecondaryColor);
+            obj.addProperty("hasTrait", src.hasTrait);
+
+            if (src.biomesWhitelist != null && src.biomesWhitelist.size() != 0)
+                obj.add("biomesWhitelist", src.biomesWhitelist);
+
+            if (src.biomesBlacklist != null && src.biomesBlacklist.size() != 0)
+                obj.add("biomesBlacklist", src.biomesBlacklist);
+
+            obj.addProperty("spawnNaturally", src.spawnNaturally);
+            obj.addProperty("spawnWeight", src.spawnWeight);
+            obj.addProperty("spawnType", src.spawnType);
+
+            obj.addProperty("parentA", src.parentA);
+            obj.addProperty("parentB", src.parentB);
 
             return obj;
         }

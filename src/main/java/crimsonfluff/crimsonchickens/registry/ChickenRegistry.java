@@ -2,6 +2,7 @@ package crimsonfluff.crimsonchickens.registry;
 
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -28,6 +29,12 @@ public class ChickenRegistry implements IResourceChickenRegistry {
      * @return Returns a ChickenData object for the given chicken.
      */
     public ResourceChickenData getChickenData(String name) { return chickenInfo.get(name); }
+
+
+    @Override
+    public Map<String, ResourceChickenData> getChickens() {
+        return Collections.unmodifiableMap(chickenInfo);
+    }
 
 
     /**

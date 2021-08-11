@@ -1,0 +1,29 @@
+{
+  "duck.ambient": {
+    "category": "neutral",
+    "sounds": [
+      "crimsonchickens:duck_ambient_1",
+      "crimsonchickens:duck_ambient_2",
+      "crimsonchickens:duck_ambient_3"
+    ],
+    "subtitle": "crimsonchickens.subtitle.duck_ambient"
+  },
+  "duck.hurt": {
+    "category": "neutral",
+    "sounds": [
+      "crimsonchickens:duck_ambient_1",
+      "crimsonchickens:duck_ambient_2",
+      "crimsonchickens:duck_ambient_3"
+    ],
+    "subtitle": "crimsonchickens.subtitle.duck_hurt"
+  },
+  "duck.death": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "crimsonchickens:duck_death"
+      }
+    ],
+    "subtitle": "crimsonchickens.subtitle.duck_death"
+  }
+}

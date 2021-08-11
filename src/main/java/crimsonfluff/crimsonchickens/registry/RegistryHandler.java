@@ -1,15 +1,18 @@
 package crimsonfluff.crimsonchickens.registry;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
-import crimsonfluff.crimsonchickens.SupplierSpawnEggItem;
+import crimsonfluff.crimsonchickens.entity.DuckEggProjectileEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
-import crimsonfluff.crimsonchickens.init.ModEntities;
-import crimsonfluff.crimsonchickens.init.ModItems;
+import crimsonfluff.crimsonchickens.init.initEntities;
+import crimsonfluff.crimsonchickens.init.initItems;
+import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.item.SpawnEggItem;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
@@ -18,15 +21,26 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class RegistryHandler {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, CrimsonChickens.MOD_ID);
 
+    public static final RegistryObject<EntityType<DuckEggProjectileEntity>> DUCK_EGG = ENTITY_TYPES.register("duck_egg",
+        () -> EntityType.Builder.<DuckEggProjectileEntity>of(DuckEggProjectileEntity::new, EntityClassification.MISC)
+            .sized(0.25F, 0.25F)
+            .clientTrackingRange(4)
+            .updateInterval(10)
+            .build(new ResourceLocation(CrimsonChickens.MOD_ID, "duck_egg").toString()));
+
+
     public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
-        ModEntities.getModChickens().forEach((s, customChicken) -> event.put(customChicken.get(), ResourceChickenEntity.createChickenAttributes(s).build()));
+        initEntities.getModChickens().forEach((s, customChicken) -> {
+            event.put(customChicken.get(), ResourceChickenEntity.createChickenAttributes(s).build());
+            EntitySpawnPlacementRegistry.register(customChicken.get(), EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, (animal, world, reason, pos, random) -> true);
+        });
     }
 
     public static void registerChicken(String name, ResourceChickenData chickenData) {
         final RegistryObject<EntityType<? extends ResourceChickenEntity>> customChickenEntity;
 
         if (chickenData.isFireImmune) {
-                customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
+            customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
                 .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), EntityClassification.CREATURE)
                 .sized(0.4f, 0.7f)
                 .fireImmune()
@@ -38,15 +52,11 @@ public class RegistryHandler {
                 .build(name + "_chicken"));
         }
 
-//        final RegistryObject<Item> customSpawnEgg = ModItems.ITEMS.register(name + "_chicken_spawn_egg",
-//            () -> new ChickenSpawnEggItem(customChickenEntity, 0x303030, 0x303030, chickenData, new Item.Properties().tab(CrimsonChickens.TAB)));
+        final RegistryObject<Item> SPAWN_EGG = initItems.ITEMS.register(name + "_chicken_spawn_egg",
+            () -> new SupplierSpawnEggItem(customChickenEntity, chickenData));
 
-        final RegistryObject<SpawnEggItem> SPAWN_EGG = ModItems.ITEMS.register(name + "_chicken_spawn_egg",
-            () -> new SupplierSpawnEggItem(null, customChickenEntity, 0x6441a5, 0xFFFFFF, new Item.Properties().tab(CrimsonChickens.TAB)));
-
-        ModEntities.getModChickens().put(name, customChickenEntity);
+        initEntities.getModChickens().put(name, customChickenEntity);
         chickenData.setEntityTypeRegistryID(customChickenEntity.getId());
-
-//        chickenData.setSpawnEggItemRegistryObject(customBeeSpawnEgg);
+        chickenData.setSpawnEggItemRegistryObject(SPAWN_EGG);
     }
 }

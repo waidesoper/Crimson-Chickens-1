@@ -1,3 +1,14 @@
 {
-  "itemGroup.crimsonchickens": "Crimson's Chicken Resources"
+  "itemGroup.crimsonchickens": "Crimson's Chicken Resources",
+
+  "tip.crimsonchickens.spawn_egg": "Spawn Egg",
+
+  "item.crimsonchickens.duck_egg": "Duck Egg",
+  "item.crimsonchickens.duck_feather": "Duck Feather",
+  "item.crimsonchickens.duck": "Raw Duck",
+  "item.crimsonchickens.duck_cooked": "Cooked Duck",
+
+  "death.attack.chicken.thorns": "You got killed by a prickly chicken !",
+  "death.attack.chicken.explode": "You got killed by an exploding chicken !",
+  "death.attack.shears": "You got killed by shears !"
 }
