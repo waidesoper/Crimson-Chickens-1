@@ -41,6 +41,7 @@ public class ResourceChickenData {
     public String parentA = "";
     public String parentB = "";
 
+    public boolean enabled = false;
 
     private transient RegistryObject<Item> spawnEggItemRegistryObject;
     private transient ResourceLocation entityTypeRegistryID;

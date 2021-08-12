@@ -63,6 +63,7 @@ public class Serializers {
 
             mt.parentA = obj.get("parentA").getAsString();
             mt.parentB = obj.get("parentB").getAsString();
+            mt.enabled = obj.get("enabled").getAsBoolean();
 
             return mt;
         }
@@ -96,6 +97,7 @@ public class Serializers {
 
             obj.addProperty("parentA", src.parentA);
             obj.addProperty("parentB", src.parentB);
+            obj.addProperty("enabled", src.enabled);
 
             return obj;
         }

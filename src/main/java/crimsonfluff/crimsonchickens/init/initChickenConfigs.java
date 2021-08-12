@@ -65,12 +65,14 @@ public class initChickenConfigs {
                 ResourceChickenData chickenData = gson.fromJson(reader, ResourceChickenData.class);
                 reader.close();
 
-                String name = file.getName();
-                name = name.substring(0, name.length() - 5);        // remove ".json"
+                if (chickenData.enabled) {
+                    String name = file.getName();
+                    name = name.substring(0, name.length() - 5);        // remove ".json"
 
-                chickenData.name = name;
-                ChickenRegistry.getRegistry().registerChicken(name, chickenData);
-                RegistryHandler.registerChicken(name, chickenData);
+                    chickenData.name = name;
+                    ChickenRegistry.getRegistry().registerChicken(name, chickenData);
+                    RegistryHandler.registerChicken(name, chickenData);
+                }
 
             } catch (Exception e) {
                 e.printStackTrace();

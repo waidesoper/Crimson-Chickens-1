@@ -10,6 +10,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.*;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -38,6 +39,7 @@ import net.minecraftforge.fml.RegistryObject;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
+import javax.swing.*;
 import java.util.Collection;
 import java.util.Map;
 import java.util.Objects;
@@ -291,24 +293,58 @@ public class ResourceChickenEntity extends ChickenEntity {
         }
     }
 
-    /*
-     TODO: better way to return null/cancel breeding
-     otherwise both chickens get stuck 'kissing'
-    */
+    @Override
+    public boolean canMate(AnimalEntity entityIn) {
+        if (entityIn == this) return false;
+        else if (entityIn.getClass() != this.getClass()) return false;
+
+        if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 0) return false;
+
+        if (this.isInLove() && entityIn.isInLove()) {
+            ResourceChickenEntity rce = (ResourceChickenEntity) entityIn;
+
+            if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 2) {
+                if (! chickenData.canBreed) return false;
+                if (! rce.chickenData.canBreed) return false;
+            }
+
+            // only ducks can breed with ducks !
+            if (chickenData.hasTrait == 1 && rce.chickenData.hasTrait != 1) return false;
+            if (chickenData.hasTrait != 1 && rce.chickenData.hasTrait == 1) return false;
+
+            // if both chickens are the same...
+            if (chickenData.name.equals(rce.chickenData.name)) return true;
+
+            if (! CrimsonChickens.CONFIGURATION.masterSwitchCrossBreeding.get()) return false;
+
+            // Work out cross-breeding types
+            if (CrimsonChickens.CONFIGURATION.masterSwitchCrossBreeding.get()) {
+                String parentA = this.chickenData.getEntityTypeRegistryID().toString();
+                String parentB = ((ResourceChickenEntity) entityIn).chickenData.getEntityTypeRegistryID().toString();
+
+                boolean a, b;
+                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+                    String string = entry.getKey();
+                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(string);
+
+                    a = (Objects.equals(chickenData.parentA, parentA) && Objects.equals(chickenData.parentB, parentB));
+                    b = (Objects.equals(chickenData.parentA, parentB) && Objects.equals(chickenData.parentB, parentA));
+
+                    if (a || b) return true;
+                }
+
+                return false;
+            }
+        } else return false;
+
+        return true;
+    }
+
     @Override
     public ChickenEntity getBreedOffspring(ServerWorld worldIn, AgeableEntity ageableEntity) {
-        if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 0) return null;
-
         ResourceChickenEntity rce = null;
         if (ageableEntity instanceof ResourceChickenEntity)
             rce = (ResourceChickenEntity) ageableEntity;
-
-        if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 2) {
-            if (! chickenData.canBreed) return null;
-
-            if (rce != null)
-                if (! rce.chickenData.canBreed) return null;
-        }
 
         // if chickens are same type and allow breeding then go for it...
         if (rce != null) {
@@ -320,9 +356,6 @@ public class ResourceChickenEntity extends ChickenEntity {
                     : initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
             }
 
-            // only ducks can breed with ducks !
-            if (chickenData.hasTrait == 1 || rce.chickenData.hasTrait == 1) return null;
-
             // if both chickens are the same...
             if (chickenData.name.equals(rce.chickenData.name))
                 return initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
@@ -331,27 +364,25 @@ public class ResourceChickenEntity extends ChickenEntity {
             if (CrimsonChickens.CONFIGURATION.masterSwitchCrossBreeding.get()) {
                 String parentA = this.chickenData.getEntityTypeRegistryID().toString();
                 String parentB = ((ResourceChickenEntity) ageableEntity).chickenData.getEntityTypeRegistryID().toString();
-//                CrimsonChickens.LOGGER.info("Parent: " + parentA + " : " + parentB);
+                //CrimsonChickens.LOGGER.info("Parent: " + parentA + " : " + parentB);
 
                 boolean a, b;
                 for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
                     String string = entry.getKey();
-                    RegistryObject<EntityType<? extends ResourceChickenEntity>> thing = entry.getValue();
+                    //RegistryObject<EntityType<? extends ResourceChickenEntity>> thing = entry.getValue();
                     ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(string);
 
-//                    a = (Objects.equals(chickenData.parentA, parentA) || Objects.equals(chickenData.parentA, parentB));
-//                    b = (Objects.equals(chickenData.parentB, parentA) || Objects.equals(chickenData.parentB, parentB));
                     a = (Objects.equals(chickenData.parentA, parentA) && Objects.equals(chickenData.parentB, parentB));
                     b = (Objects.equals(chickenData.parentA, parentB) && Objects.equals(chickenData.parentB, parentA));
 
                     if (a || b) {
                         worldIn.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundCategory.BLOCKS, 1f, 1f);
-                        return thing.get().create(worldIn);
+                        return entry.getValue().get().create(worldIn);
                     }
                 }
             }
 
-            return null;
+            return null;        // this should never be reached?
 
         } else {
             // breeding with vanilla/other modded
