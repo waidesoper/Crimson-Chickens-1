@@ -19,7 +19,7 @@ public class ResourceChickenRenderer extends MobRenderer<ResourceChickenEntity, 
     public ResourceChickenRenderer(EntityRendererManager renderManagerIn, ResourceChickenData chickenData) {
         super(renderManagerIn, new ChickenModel<>(), 0.3F);
 
-        CHICKEN_TEXTURE = ResourceLocation.tryParse(CrimsonChickens.MOD_ID + ":textures/entity/chicken/" + chickenData.name + ".png");
+        CHICKEN_TEXTURE = ResourceLocation.tryParse(CrimsonChickens.MOD_ID + ":textures/entity/" + chickenData.name + ".png");
     }
 
     @Override

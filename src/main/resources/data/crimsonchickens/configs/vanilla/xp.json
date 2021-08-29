@@ -1,0 +1,22 @@
+{
+	"displayName": "Experience Chicken",
+	"dropItem": "crimsonchickens:xp_item",
+	"dropItemNBT": "",
+	"spawnNaturally": false,
+	"spawnType": 0,
+	"spawnWeight": 10,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": false,
+	"conversion": 500,
+	"biomesWhitelist": [],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 12051546,
+	"eggColorForeground": 12051546,
+	"hasTrait": 0,
+	"parentA": "",
+	"parentB": "",
+	"enabled": true
+}

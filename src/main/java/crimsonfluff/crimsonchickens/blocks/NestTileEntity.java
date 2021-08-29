@@ -279,7 +279,7 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
         this.entityCaptured = compound.copy();
         this.entityDescription = desc;
         this.chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(this.entityCaptured.getString("id"));
-        this.chickenTexture = new ResourceLocation("crimsonchickens:textures/entity/chicken/" + this.chickenData.name + ".png");
+        this.chickenTexture = new ResourceLocation("crimsonchickens:textures/entity/" + this.chickenData.name + ".png");
         this.entityCustomName = ITextComponent.Serializer.fromJson(this.entityCaptured.getString("CustomName"));
 
         this.eggLayTime = compound.getInt("EggLayTime");

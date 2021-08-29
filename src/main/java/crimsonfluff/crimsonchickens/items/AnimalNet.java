@@ -20,6 +20,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -27,6 +28,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
+import javax.annotation.Resource;
 import java.util.List;
 
 public class AnimalNet extends Item {
@@ -36,7 +38,7 @@ public class AnimalNet extends Item {
 
     @Override
     public ActionResultType interactLivingEntity(ItemStack itemStack, PlayerEntity playerIn, LivingEntity entityIn, Hand handIn) {
-        if (playerIn.level.isClientSide) return super.interactLivingEntity(itemStack, playerIn, entityIn, handIn);
+        if (playerIn.level.isClientSide) return ActionResultType.PASS;
 
 // this is not needed because AnimalNet has durability, so no need to split stack
 // would be nice to set max_durability. carry stack of 8 nets then split them when used??
@@ -51,12 +53,14 @@ public class AnimalNet extends Item {
 //        } else
 //            newStack = itemStack;
 
-        if (entityIn.getClassification(false) == EntityClassification.MONSTER) return ActionResultType.FAIL;
-
         ResourceChickenData chickenData = null;
         if (entityIn instanceof ResourceChickenEntity) {
             chickenData = ((ResourceChickenEntity) entityIn).chickenData;
             if (chickenData.name.equals("grave")) return ActionResultType.FAIL;     // can't pick up grave chicken
+
+        } else {
+            // config.SpawnType=1 would mean Resource Chicken would be MONSTER classification
+            if (entityIn.getClassification(false) == EntityClassification.MONSTER) return ActionResultType.FAIL;
         }
 
         // checks for ClientSide and isDamageable and Creative
@@ -79,7 +83,6 @@ public class AnimalNet extends Item {
             compoundStack.putString("entityDescription", chickenData.displayName);
         else
             compoundStack.putString("entityDescription", entityIn.getType().getDescriptionId());
-        itemStack.setTag(compoundStack);        // TODO: not working in Creative !?
 
         playerIn.sweepAttack();
         playerIn.level.playSound(null, playerIn.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
