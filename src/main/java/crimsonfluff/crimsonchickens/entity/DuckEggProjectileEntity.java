@@ -2,11 +2,11 @@ package crimsonfluff.crimsonchickens.entity;
 
 import crimsonfluff.crimsonchickens.init.initEntities;
 import crimsonfluff.crimsonchickens.init.initItems;
+import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import mcp.MethodsReturnNonnullByDefault;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -22,6 +22,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 import javax.annotation.ParametersAreNonnullByDefault;
+import java.util.ArrayList;
+import java.util.List;
 
 @MethodsReturnNonnullByDefault
 @ParametersAreNonnullByDefault
@@ -62,13 +64,19 @@ public class DuckEggProjectileEntity extends ProjectileItemEntity {
         if (!this.level.isClientSide) {
             if (this.random.nextInt(8) == 0) {
                 int i = 1;
-                if (this.random.nextInt(32) == 0) {
-                    i = 4;
-                }
+                if (this.random.nextInt(32) == 0) i = 4;
 
-                for(int j = 0; j < i; ++j) {
-                    if (initEntities.getModChickens().containsKey("duck")) {
-                        ChickenEntity duck = initEntities.getModChickens().get("duck").get().create(this.level);
+                //search ChickenRegistry for all duck types and randomly choose one to spawn
+                List<String> lst = new ArrayList<>();
+                ChickenRegistry.getRegistry().getChickens().forEach((s, chicken) -> {
+                    if (chicken.hasTrait == 1) lst.add(s);
+                });
+
+                if (lst.size() != 0) {
+                    ResourceChickenEntity duck = initEntities.getModChickens()
+                        .get(lst.get(this.random.nextInt(lst.size()))).get().create(this.level);
+
+                    for (int j = 0; j < i; ++ j) {
                         duck.setAge(- 24000);
                         duck.moveTo(this.getX(), this.getY(), this.getZ(), this.yRot, 0.0F);
                         this.level.addFreshEntity(duck);

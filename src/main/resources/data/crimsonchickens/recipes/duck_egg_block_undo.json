@@ -1,0 +1,12 @@
+{
+    "type": "minecraft:crafting_shapeless",
+    "ingredients": [
+        {
+            "item": "crimsonchickens:duck_egg_block"
+        }
+    ],
+    "result": {
+        "item": "crimsonchickens:duck_egg",
+        "count": 9
+    }
+}

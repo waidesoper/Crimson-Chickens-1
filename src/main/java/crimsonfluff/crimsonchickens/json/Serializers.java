@@ -3,10 +3,7 @@ package crimsonfluff.crimsonchickens.json;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.JsonToNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
 
 import java.lang.reflect.Type;
 
@@ -33,7 +30,8 @@ public class Serializers {
             mt.displayName = obj.get("displayName").getAsString();
             mt.eggLayTime = obj.get("eggLayTime").getAsInt();
             mt.canBreed = obj.get("canBreed").getAsBoolean();
-            mt.dropItemItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(obj.get("dropItem").getAsString()));
+            //mt.dropItemItem = ForgeRegistries.ITEMS.getValue(new ResourceLocation(obj.get("dropItem").getAsString()));
+            mt.dropItemItem = obj.get("dropItem").getAsString();
             String st = obj.get("dropItemNBT").getAsString();
             if (st.length() != 0) {
                 try {
@@ -73,7 +71,7 @@ public class Serializers {
             JsonObject obj = new JsonObject();
 
             obj.addProperty("displayName", src.displayName);
-            obj.addProperty("dropItem", src.dropItemItem.getItem() == Items.AIR ? "" : src.dropItemItem.getRegistryName().toString());
+            obj.addProperty("dropItem", src.dropItemItem);
             obj.addProperty("dropItemNBT", src.dropItemNBT == null ? "" : src.dropItemNBT.toString());
             obj.addProperty("eggLayTime", src.eggLayTime);
             obj.addProperty("canBreed", src.canBreed);

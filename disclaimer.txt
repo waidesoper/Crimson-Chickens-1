@@ -1,0 +1,13 @@
+This mod is heavily inspired by:
+Chickens    Author setycz           @ https://www.curseforge.com/minecraft/mc-mods/chickens     MIT License
+Hatchery    Author GenDeathrow      @ https://www.curseforge.com/minecraft/mc-mods/hatchery     All Rights Reserved
+
+The Stats system is taken from the Chickens mod
+The Blaze, Creeper, Leather, Log, Magma, PCrystal, PShard, Quartz and Spider textures are
+from the original Chickens mod - Most legs/feet/eyes have been re-edited
+Any artists please contact me
+Other textures are made from Minecraft 1.16.5 textures
+
+Fluff Discord: https://discord.gg/QD9kvnFuA4
+
+Duck Sound effects obtained from https://www.zapsplat.com

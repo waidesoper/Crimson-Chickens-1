@@ -1,0 +1,22 @@
+{
+	"displayName": "Honey Chicken",
+	"dropItem": "minecraft:honeycomb",
+	"dropItemNBT": "",
+	"spawnNaturally": false,
+	"spawnType": 0,
+	"spawnWeight": 15,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": false,
+	"conversion": 500,
+	"biomesWhitelist": [],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 15433489,
+	"eggColorForeground": 16777062,
+	"hasTrait": 0,
+	"parentA": "",
+	"parentB": "",
+	"enabled": true
+}

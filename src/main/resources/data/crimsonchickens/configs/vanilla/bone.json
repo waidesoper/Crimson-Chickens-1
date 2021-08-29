@@ -1,0 +1,22 @@
+{
+	"displayName": "Bone Chicken",
+	"dropItem": "minecraft:bonemeal",
+	"dropItemNBT": "",
+	"spawnNaturally": true,
+	"spawnType": 0,
+	"spawnWeight": 15,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": true,
+	"conversion": 500,
+	"biomesWhitelist": ["minecraft:hell"],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 15921906,
+	"eggColorForeground": 10329495,
+	"hasTrait": 0,
+	"parentA": "",
+	"parentB": "",
+	"enabled": true
+}

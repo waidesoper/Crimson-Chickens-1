@@ -1,0 +1,19 @@
+{
+  "variants": {
+    "facing=north": {
+      "model": "crimsonchickens:block/nest"
+    },
+	"facing=east": {
+      "model": "crimsonchickens:block/nest",
+      "y": 90
+    },
+	"facing=south": {
+      "model": "crimsonchickens:block/nest",
+      "y": 180
+    },
+    "facing=west": {
+      "model": "crimsonchickens:block/nest",
+      "y": 270
+    }
+  }
+}

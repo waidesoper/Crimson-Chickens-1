@@ -26,7 +26,9 @@ public class ResourceChickenData {
     public int hasTrait = 0;
 
     public CompoundNBT dropItemNBT = null;      // cache the actual NBT
-    public Item dropItemItem = null;            // cache the actual item
+//    public Item dropItemItem = null;            // cache the actual item
+    public String dropItemItem = "";            // cant cache because FMLCommonSetUp is too late to register chickens
+                                                //and modded items may not exist yet
 
     public JsonArray biomesWhitelist = null;
     public JsonArray biomesBlacklist = null;
@@ -43,6 +45,7 @@ public class ResourceChickenData {
 
     public boolean enabled = false;
 
+
     private transient RegistryObject<Item> spawnEggItemRegistryObject;
     private transient ResourceLocation entityTypeRegistryID;
 
@@ -53,7 +56,6 @@ public class ResourceChickenData {
     public void setEntityTypeRegistryID(ResourceLocation entityTypeRegistryID) {
         this.entityTypeRegistryID = this.entityTypeRegistryID == null ? entityTypeRegistryID : this.entityTypeRegistryID;
     }
-
 
     public RegistryObject<Item> getSpawnEggItemRegistryObject() {
         return spawnEggItemRegistryObject;

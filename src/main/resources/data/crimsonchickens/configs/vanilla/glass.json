@@ -1,0 +1,22 @@
+{
+	"displayName": "Glass Chicken",
+	"dropItem": "minecraft:glass",
+	"dropItemNBT": "",
+	"spawnNaturally": false,
+	"spawnType": 0,
+	"spawnWeight": 15,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": false,
+	"conversion": 500,
+	"biomesWhitelist": [],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 16777215,
+	"eggColorForeground": 15658751,
+	"hasTrait": 0,
+	"parentA": "crimsonchickens:quartz_chicken",
+	"parentB": "crimsonchickens:redstone_chicken",
+	"enabled": true
+}

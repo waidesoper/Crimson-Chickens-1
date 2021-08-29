@@ -30,6 +30,16 @@ public class ChickenRegistry implements IResourceChickenRegistry {
      */
     public ResourceChickenData getChickenData(String name) { return chickenInfo.get(name); }
 
+    public ResourceChickenData getChickenDataFromID(String name) {
+        for (Map.Entry<String, ResourceChickenData> entry : chickenInfo.entrySet()) {
+            String s = entry.getKey();
+            ResourceChickenData ci = entry.getValue();
+            if (ci.getEntityTypeRegistryID().toString().equals(name)) return chickenInfo.get(s);
+        }
+
+        return null; //chickenInfo.get("");
+    }
+
 
     @Override
     public Map<String, ResourceChickenData> getChickens() {

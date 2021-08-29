@@ -1,0 +1,22 @@
+{
+	"displayName": "Gravestone Chicken",
+	"dropItem": "",
+	"dropItemNBT": "",
+	"spawnNaturally": false,
+	"spawnType": 0,
+	"spawnWeight": 0,
+	"canBreed": false,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": false,
+	"conversion": 0,
+	"biomesWhitelist": [],
+	"biomesBlacklist": [],
+	"eggLayTime": 0,
+	"eggColorBackground": 10329495,
+	"eggColorForeground": 8606770,
+	"hasTrait": 0,
+	"parentA": "",
+	"parentB": "",
+	"enabled": true
+}

@@ -1,0 +1,22 @@
+{
+	"displayName": "Netherwart Chicken",
+	"dropItem": "minecraft:netherwart",
+	"dropItemNBT": "",
+	"spawnNaturally": false,
+	"spawnType": 0,
+	"spawnWeight": 15,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": true,
+	"conversion": 500,
+	"biomesWhitelist": [],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 8388608,
+	"eggColorForeground": 3348992,
+	"hasTrait": 0,
+	"parentA": "crimsonchickens:dye_brown_chicken",
+	"parentB": "crimsonchickens:glowstone_chicken",
+	"enabled": true
+}

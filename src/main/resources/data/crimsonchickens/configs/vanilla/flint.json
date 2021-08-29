@@ -1,0 +1,22 @@
+{
+	"displayName": "Flint Chicken",
+	"dropItem": "minecraft:flint",
+	"dropItemNBT": "",
+	"spawnNaturally": true,
+	"spawnType": 0,
+	"spawnWeight": 15,
+	"canBreed": true,
+	"baseHealth": 4,
+	"baseSpeed": 0.25,
+	"isFireImmune": false,
+	"conversion": 500,
+	"biomesWhitelist": ["minecraft:gravelly_mountains", "minecraft:modified_gravelly_mountains", "minecraft:stone_shore"],
+	"biomesBlacklist": [],
+	"eggLayTime": 6000,
+	"eggColorBackground": 7039815,
+	"eggColorForeground": 10724213,
+	"hasTrait": 0,
+	"parentA": "",
+	"parentB": "",
+	"enabled": true
+}
