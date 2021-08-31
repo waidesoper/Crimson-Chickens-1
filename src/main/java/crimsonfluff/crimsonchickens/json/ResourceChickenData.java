@@ -1,10 +1,10 @@
 package crimsonfluff.crimsonchickens.json;
 
 import com.google.gson.JsonArray;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraftforge.fmllegacy.RegistryObject;
 
 public class ResourceChickenData {
     //private static RegistryObject<Item> spawnEggItemRegistryObject;
@@ -25,7 +25,7 @@ public class ResourceChickenData {
     // 6= glass sounds, 7= ghast sounds, 8= bone sounds
     public int hasTrait = 0;
 
-    public CompoundNBT dropItemNBT = null;      // cache the actual NBT
+    public CompoundTag dropItemNBT = null;      // cache the actual NBT
 //    public Item dropItemItem = null;            // cache the actual item
     public String dropItemItem = "";            // cant cache because FMLCommonSetUp is too late to register chickens
                                                 //and modded items may not exist yet

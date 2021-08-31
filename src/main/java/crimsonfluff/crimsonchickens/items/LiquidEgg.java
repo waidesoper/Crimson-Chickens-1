@@ -2,67 +2,98 @@ package crimsonfluff.crimsonchickens.items;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ILiquidContainer;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.item.EggItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.BlockRayTraceResult;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.world.World;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResultHolder;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.EggItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ClipContext;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.LiquidBlockContainer;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.gameevent.GameEvent;
+import net.minecraft.world.level.material.Fluid;
+import net.minecraft.world.phys.BlockHitResult;
+import net.minecraft.world.phys.HitResult;
+
+import javax.annotation.Nullable;
 
 public class LiquidEgg extends EggItem {
     private final Fluid content;
 
     public LiquidEgg(Fluid p_i49025_1_) {
-        super(new Properties().tab(CrimsonChickens.TAB).stacksTo(64));
+        super(new Properties().tab(CrimsonChickens.TAB).stacksTo(16));
         this.content = p_i49025_1_;
     }
 
     @Override
-    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-//        return super.use(p_77659_1_, p_77659_2_, p_77659_3_);
-
+    public InteractionResultHolder<ItemStack> use(Level worldIn, Player playerIn, InteractionHand handIn) {
         ItemStack itemstack = playerIn.getItemInHand(handIn);
-        BlockRayTraceResult raytraceresult = getPlayerPOVHitResult(worldIn, playerIn, RayTraceContext.FluidMode.NONE);
+        BlockHitResult BlockHitResult = getPlayerPOVHitResult(worldIn, playerIn, ClipContext.Fluid.NONE);
 
-        ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(playerIn, worldIn, itemstack, raytraceresult);
+        InteractionResultHolder<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(playerIn, worldIn, itemstack, BlockHitResult);
         if (ret != null) return ret;
 
-        if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-            return ActionResult.pass(itemstack);
+        if (BlockHitResult.getType() == HitResult.Type.MISS) {
+            return InteractionResultHolder.pass(itemstack);
 
-        } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-            return ActionResult.pass(itemstack);
+        } else if (BlockHitResult.getType() != HitResult.Type.BLOCK) {
+            return InteractionResultHolder.pass(itemstack);
 
         } else {
-            BlockPos blockpos = raytraceresult.getBlockPos();
-            Direction direction = raytraceresult.getDirection();
+            BlockPos blockpos = BlockHitResult.getBlockPos();
+            Direction direction = BlockHitResult.getDirection();
             BlockPos blockpos1 = blockpos.relative(direction);
 
             BlockState blockstate = worldIn.getBlockState(blockpos);
             BlockPos blockpos2 = canBlockContainFluid(worldIn, blockpos, blockstate) ? blockpos : blockpos1;
-            if (worldIn.setBlockAndUpdate(blockpos2, content.defaultFluidState().createLegacyBlock())) {
-//                this.checkExtraContent(p_77659_1_, itemstack, blockpos2);
-                if (playerIn instanceof ServerPlayerEntity)
-                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity)playerIn, blockpos2, itemstack);
 
-//                p_77659_2_.awardStat(Stats.ITEM_USED.get(this));
-                return ActionResult.sidedSuccess(itemstack, worldIn.isClientSide());
-            } else {
-                return ActionResult.fail(itemstack);
+            if (worldIn.dimensionType().ultraWarm() && this.content.is(FluidTags.WATER)) {
+                int i = blockpos2.getX();
+                int j = blockpos2.getY();
+                int k = blockpos2.getZ();
+                worldIn.playSound(null, blockpos2, SoundEvents.FIRE_EXTINGUISH, SoundSource.BLOCKS, 0.5F, 2.6F + (worldIn.random.nextFloat() - worldIn.random.nextFloat()) * 0.8F);
+
+                for (int l = 0; l < 8; ++ l) {
+                    worldIn.addParticle(ParticleTypes.LARGE_SMOKE, (double) i + Math.random(), (double) j + Math.random(), (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
+                }
+
+                return InteractionResultHolder.sidedSuccess(itemstack, worldIn.isClientSide());
+            }
+
+            if (worldIn.setBlockAndUpdate(blockpos2, content.defaultFluidState().createLegacyBlock())) {
+                if (playerIn instanceof ServerPlayer)
+                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayer) playerIn, blockpos2, itemstack);
+
+                this.playEmptySound(playerIn, worldIn, blockpos2);
+
+                playerIn.awardStat(Stats.ITEM_USED.get(this));
+                return InteractionResultHolder.sidedSuccess(itemstack, worldIn.isClientSide());
             }
         }
+
+        return InteractionResultHolder.fail(itemstack);
     }
 
-    private boolean canBlockContainFluid(World worldIn, BlockPos posIn, BlockState blockstate) {
-        return blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer)blockstate.getBlock()).canPlaceLiquid(worldIn, posIn, blockstate, this.content);
+    private boolean canBlockContainFluid(Level worldIn, BlockPos posIn, BlockState blockstate) {
+        return blockstate.getBlock() instanceof LiquidBlockContainer && ((LiquidBlockContainer)blockstate.getBlock()).canPlaceLiquid(worldIn, posIn, blockstate, this.content);
+    }
+
+    protected void playEmptySound(@Nullable Player p_40696_, LevelAccessor p_40697_, BlockPos p_40698_) {
+        SoundEvent soundevent = this.content.getAttributes().getEmptySound();
+        if(soundevent == null) soundevent = this.content.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
+
+        p_40697_.playSound(p_40696_, p_40698_, soundevent, SoundSource.BLOCKS, 1.0F, 1.0F);
+        p_40697_.gameEvent(p_40696_, GameEvent.FLUID_PLACE, p_40698_);
     }
 }

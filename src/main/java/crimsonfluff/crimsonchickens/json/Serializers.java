@@ -1,9 +1,8 @@
 package crimsonfluff.crimsonchickens.json;
 
 import com.google.gson.*;
-import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.TagParser;
 
 import java.lang.reflect.Type;
 
@@ -35,7 +34,7 @@ public class Serializers {
             String st = obj.get("dropItemNBT").getAsString();
             if (st.length() != 0) {
                 try {
-                    mt.dropItemNBT = new JsonToNBT(new StringReader(st)).readStruct();
+                    mt.dropItemNBT = TagParser.parseTag(obj.get("dropItemNBT").getAsString());
                 } catch (CommandSyntaxException e) {
                     e.printStackTrace();
                 }

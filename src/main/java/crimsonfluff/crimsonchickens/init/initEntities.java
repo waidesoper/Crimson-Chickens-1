@@ -1,8 +1,8 @@
 package crimsonfluff.crimsonchickens.init;
 
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
-import net.minecraft.entity.EntityType;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.entity.EntityType;
+import net.minecraftforge.fmllegacy.RegistryObject;
 
 import java.util.HashMap;
 import java.util.Map;

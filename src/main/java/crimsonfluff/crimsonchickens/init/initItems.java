@@ -5,12 +5,12 @@ import crimsonfluff.crimsonchickens.items.AnimalNet;
 import crimsonfluff.crimsonchickens.items.DuckEgg;
 import crimsonfluff.crimsonchickens.items.LiquidEgg;
 import crimsonfluff.crimsonchickens.items.xpItem;
-import net.minecraft.fluid.Fluids;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.EggItem;
-import net.minecraft.item.Foods;
-import net.minecraft.item.Item;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.world.food.Foods;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.EggItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.material.Fluids;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -23,8 +23,8 @@ public class initItems {
     public static final RegistryObject<Item> DUCK = ITEMS.register("duck", ()-> new Item(new Item.Properties().tab(CrimsonChickens.TAB).food(Foods.CHICKEN)));
     public static final RegistryObject<Item> COOKED_DUCK = ITEMS.register("duck_cooked", ()-> new Item(new Item.Properties().tab(CrimsonChickens.TAB).food(Foods.COOKED_CHICKEN)));
 
-    public static final RegistryObject<EggItem> WATER_EGG = ITEMS.register("water_egg", ()-> new LiquidEgg(Fluids.WATER.getFluid()));
-    public static final RegistryObject<EggItem> LAVA_EGG = ITEMS.register("lava_egg", ()-> new LiquidEgg(Fluids.LAVA.getFluid()));
+    public static final RegistryObject<EggItem> WATER_EGG = ITEMS.register("water_egg", ()-> new LiquidEgg(Fluids.WATER.getSource()));
+    public static final RegistryObject<EggItem> LAVA_EGG = ITEMS.register("lava_egg", ()-> new LiquidEgg(Fluids.LAVA.getSource()));
 
     public static final RegistryObject<Item> ANIMAL_NET = ITEMS.register("animal_net", AnimalNet::new);
 

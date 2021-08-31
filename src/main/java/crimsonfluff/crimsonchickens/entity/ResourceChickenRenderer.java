@@ -2,12 +2,13 @@ package crimsonfluff.crimsonchickens.entity;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
-import mcp.MethodsReturnNonnullByDefault;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.MethodsReturnNonnullByDefault;
+import net.minecraft.client.model.ChickenModel;
+import net.minecraft.client.model.geom.ModelLayers;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
-import net.minecraft.client.renderer.entity.model.ChickenModel;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -16,10 +17,10 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ResourceChickenRenderer extends MobRenderer<ResourceChickenEntity, ChickenModel<ResourceChickenEntity>> {
     private final ResourceLocation CHICKEN_TEXTURE;
 
-    public ResourceChickenRenderer(EntityRendererManager renderManagerIn, ResourceChickenData chickenData) {
-        super(renderManagerIn, new ChickenModel<>(), 0.3F);
+    public ResourceChickenRenderer(EntityRendererProvider.Context context, ResourceChickenData chickenData) {
+        super(context, new ChickenModel<>(context.bakeLayer(ModelLayers.CHICKEN)), 0.3F);
 
-        CHICKEN_TEXTURE = ResourceLocation.tryParse(CrimsonChickens.MOD_ID + ":textures/entity/" + chickenData.name + ".png");
+        CHICKEN_TEXTURE = new ResourceLocation(CrimsonChickens.MOD_ID + ":textures/entity/" + chickenData.name + ".png");
     }
 
     @Override
@@ -29,8 +30,8 @@ public class ResourceChickenRenderer extends MobRenderer<ResourceChickenEntity, 
 
     @Override
     protected float getBob(ResourceChickenEntity entityIn, float partialTicks) {
-        float f = MathHelper.lerp(partialTicks, entityIn.oFlap, entityIn.flap);
-        float f1 = MathHelper.lerp(partialTicks, entityIn.oFlapSpeed, entityIn.flapSpeed);
-        return (MathHelper.sin(f) + 1.0F) * f1;
+        float f = Mth.lerp(partialTicks, entityIn.oFlap, entityIn.flap);
+        float f1 = Mth.lerp(partialTicks, entityIn.oFlapSpeed, entityIn.flapSpeed);
+        return (Mth.sin(f) + 1.0F) * f1;
     }
 }

@@ -1,25 +1,14 @@
 modLoader="javafml"
-loaderVersion="[${loader_version},)"
+loaderVersion="[37,)"
 license="All rights reserved"
 issueTrackerURL="https://github.com/MeinKraft/Crimson-Chickens/issues"
 
 [[mods]]
 modId="crimsonchickens"
-version="${version}"
+version="1.17.1-1.0.0"
 displayName="Crimson Chickens"
 displayURL="http://crimsonfluff.com/"
-updateJSONURL = "https://github.com/MeinKraft/Crimson-Chickens/raw/1.16.5-Official/update.json"
+updateJSONURL = "https://github.com/MeinKraft/Crimson-Chickens/raw/1.17.1/update.json"
 authors="§4Crimson_Fluff"
 logoFile="logo.png"
 description=''' "Clucking Hell, Im outta my league" '''
-
-[[dependencies.crimsonchickens]]
-    modId="minecraft"
-    mandatory=true
-    versionRange="[${mc_version}]"
-    side="BOTH"
-[[dependencies.crimsonchickens]]
-    modId="forge"
-    mandatory=true
-    versionRange="[${forge_version},)"
-    side="BOTH"

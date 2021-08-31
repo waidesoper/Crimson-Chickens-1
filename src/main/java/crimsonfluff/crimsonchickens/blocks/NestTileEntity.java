@@ -6,21 +6,19 @@ import crimsonfluff.crimsonchickens.MyItemStackHandler;
 import crimsonfluff.crimsonchickens.init.initTiles;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import mcp.mobius.waila.api.IDataAccessor;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
-import net.minecraft.tileentity.ITickableTileEntity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.Direction;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.items.CapabilityItemHandler;
@@ -29,44 +27,30 @@ import net.minecraftforge.items.ItemHandlerHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import java.util.List;
 
-public class NestTileEntity extends TileEntity implements ITickableTileEntity {
-    public final MyItemStackHandler storedItems = new MyItemStackHandler(5) {
-        @Override
-        public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
-            if (slot == 0) {
-                Item item = stack.getItem();
-                return item == Items.WHEAT_SEEDS || item == Items.BEETROOT_SEEDS || item == Items.MELON_SEEDS || item == Items.PUMPKIN_SEEDS;
-            }
-
-            return false;
-        }
-
-        @Nonnull
-        @Override
-        public ItemStack extractItem(int slot, int amount, boolean simulate) {
-            if (slot == 0) return ItemStack.EMPTY;
-
-            return super.extractItem(slot, amount, simulate);
-        }
-    };
+public class NestTileEntity extends BlockEntity implements EntityBlock {
+    public MyItemStackHandler storedItems = new MyItemStackHandler(5);
 
     private LazyOptional<IItemHandler> outputItemHandlerCached = null;
 
     public ResourceChickenData chickenData = null;
     public ResourceLocation chickenTexture = null;          // cached for efficient render of chickenEntity
-    public CompoundNBT entityCaptured = null;               // needed to restore chicken to animal net
+    public CompoundTag entityCaptured = null;               // needed to restore chicken to animal net
     public String entityDescription = "";                   // needed to restore chicken to animal net
-    public ITextComponent entityCustomName = null;
+    public Component entityCustomName = null;
     public int eggLayTime;
     public int chickenAge;
     public int chickenGrowth;
     public int chickenGain;
     public int chickenStrength;
 
-    public NestTileEntity() {
-        super(initTiles.NEST_BLOCK_TILE.get());
+    public NestTileEntity(BlockPos pos, BlockState state) {
+        super(initTiles.NEST_BLOCK_TILE.get(), pos, state);
+    }
+
+    @Override
+    public BlockEntity newBlockEntity(BlockPos blockPos, BlockState blockState) {
+        return new NestTileEntity(blockPos, blockState);
     }
 
     @Override
@@ -78,12 +62,8 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     @Override
-    public CompoundNBT getUpdateTag() {
-//        this.chickenCompound = this.getTileData().getCompound("entityCaptured");
-//        this.chickenData = ChickenRegistry.getRegistry().getChickenDataFromParent(chickenCompound.getString("id"));
-
-        CompoundNBT compound = super.getUpdateTag();
-        //save(nbt);
+    public CompoundTag getUpdateTag() {
+        CompoundTag compound = super.getUpdateTag();
 
         if (this.entityCaptured != null)
             compound.put("entityCaptured", this.entityCaptured);
@@ -99,8 +79,8 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     @Override
-    public void load(BlockState state, CompoundNBT compound) {
-        super.load(state, compound);
+    public void load(CompoundTag compound) {
+        super.load(compound);
 
         entityRemove(false);
 
@@ -114,7 +94,7 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     @Override
-    public CompoundNBT save(CompoundNBT compound) {
+    public CompoundTag save(CompoundTag compound) {
         compound.put("Inventory", this.storedItems.serializeNBT());
 
         if (this.entityCaptured != null) {
@@ -131,12 +111,10 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
         return super.save(compound);
     }
 
-    @Override
+//    @Override
     public void tick() {
-        if (this.level.isClientSide) return;
+//        if (this.level.isClientSide) return;          // we only create this Serverside, not sure if thats proper conduct, but it works
         if (this.entityCaptured == null) return;
-        if (this.chickenData == null) return;       // this should never happen!?
-
         if (this.chickenData.eggLayTime == 0) return;
 
         if (this.chickenAge < 0) {
@@ -179,7 +157,7 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
     }
 
     public void updateCache() {
-        TileEntity tileEntity = level != null ? level.getBlockEntity(getBlockPos().below()) : null;
+        BlockEntity tileEntity = level != null ? level.getBlockEntity(getBlockPos().below()) : null;
         if (tileEntity != null) {
             LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
 
@@ -199,64 +177,19 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
         return outputItemHandlerCached;
     }
 
-
-    // TODO: not updating correctly
-    public void addWailaEntityInfo(List<ITextComponent> tooltip, IDataAccessor accessor) {
-        NestTileEntity te = (NestTileEntity) accessor.getTileEntity();
-        if (te == null) return;
-
-        if (te.entityCaptured != null) {
-            tooltip.add(new StringTextComponent(te.entityDescription));
-
-            if (te.entityCaptured.contains("CustomName", 8))
-                tooltip.add(ITextComponent.Serializer.fromJson(te.entityCaptured.getString("CustomName")));
-
-            if (te.entityCaptured.getBoolean("analyzed")) {
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.growth", te.chickenGrowth));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.gain", te.chickenGain));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.strength", te.chickenStrength));
-            }
-
-//            int secs;
-//            if (te.chickenAge < 0) {
-//                secs = -te.chickenAge / 20;
-//                tooltip.add(new StringTextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs %
-//                60)));
-//
-//            } else {
-//                if (te.storedItems.getStackInSlot(0).isEmpty())
-//                    tooltip.add(new StringTextComponent("Requires seeds"));
-//
-//                  else {
-//                    secs = te.chickenEggLayTime / 20;
-//                    tooltip.add(new StringTextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs
-//                    % 60)));
-//                }
-//            }
-
-        }
-//        else {
-//            tooltip.add(new StringTextComponent("Empty"));
-//        }
-        //iProbeInfo.text(new StringTextComponent(te.getTileData().toString()));
-    }
-
-
-    @Override
-    public void handleUpdateTag(BlockState state, CompoundNBT tag) {
-        load(state, tag);
-    }
+    @Override       // definitely needed for BlockRender Update
+    public void handleUpdateTag(CompoundTag tag) { load(tag); }
 
     @Nullable
-    @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(worldPosition, 1, getUpdateTag());
+    @Override       // definitely needed for BlockRender Update
+    public ClientboundBlockEntityDataPacket getUpdatePacket() {
+        return new ClientboundBlockEntityDataPacket(worldPosition, 1, getUpdateTag());
     }
 
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        CompoundNBT nbt = pkt.getTag();
-        handleUpdateTag(getBlockState(), nbt);
+    @Override       // definitely needed for BlockRender Update
+    public void onDataPacket(Connection net, ClientboundBlockEntityDataPacket pkt) {
+        CompoundTag nbt = pkt.getTag();
+        handleUpdateTag(nbt);
     }
 
     public void entityRemove(boolean sendUpdates) {
@@ -275,12 +208,12 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
         if (sendUpdates) sendUpdates();
     }
 
-    public void entitySet(CompoundNBT compound, String desc, boolean sendUpdates) {
+    public void entitySet(CompoundTag compound, String desc, boolean sendUpdates) {
         this.entityCaptured = compound.copy();
         this.entityDescription = desc;
         this.chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(this.entityCaptured.getString("id"));
         this.chickenTexture = new ResourceLocation("crimsonchickens:textures/entity/" + this.chickenData.name + ".png");
-        this.entityCustomName = ITextComponent.Serializer.fromJson(this.entityCaptured.getString("CustomName"));
+        this.entityCustomName = Component.Serializer.fromJson(this.entityCaptured.getString("CustomName"));
 
         this.eggLayTime = compound.getInt("EggLayTime");
         this.chickenAge = compound.getInt("Age");
@@ -293,21 +226,21 @@ public class NestTileEntity extends TileEntity implements ITickableTileEntity {
 
     public void sendUpdates() {
         // this will force the block to update the render (when you add/remove the chicken to/from the nest)
-        this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0b11);
+        this.level.sendBlockUpdated(worldPosition, getBlockState(), getBlockState(), 0b11);     //0b11
         this.level.updateNeighborsAt(worldPosition, this.getBlockState().getBlock());
         this.setChanged();
     }
 
-    public void entitySetCustomName(CompoundNBT compound) {
+    public void entitySetCustomName(CompoundTag compound) {
         if (this.entityCaptured != null) {
             if (compound != null && compound.contains("Name", 8)) {
                 try {
                     String name = compound.getString("Name");
-                    ITextComponent itextcomponent = ITextComponent.Serializer.fromJson(name);
+                    Component component = Component.Serializer.fromJson(name);
 
-                    if (itextcomponent != null) {
+                    if (component != null) {
                         this.entityCaptured.putString("CustomName", name);
-                        this.entityCustomName = itextcomponent;
+                        this.entityCustomName = component;
                         return;
                     }
                 } catch (JsonParseException e) {

@@ -66,7 +66,7 @@ public class initChickenConfigs {
         if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
 
         if (Files.isRegularFile(MOD_ROOT)) {
-            try (FileSystem fileSystem = FileSystems.newFileSystem(MOD_ROOT, null)) {
+            try (FileSystem fileSystem = FileSystems.newFileSystem(MOD_ROOT)) {
                 Path path = fileSystem.getPath(dataPath);
 //                if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
 

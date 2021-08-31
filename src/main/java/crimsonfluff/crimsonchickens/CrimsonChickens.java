@@ -3,29 +3,34 @@ package crimsonfluff.crimsonchickens;
 import crimsonfluff.crimsonchickens.compat.compatTOP;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.*;
-import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.passive.ChickenEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.item.ShearsItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.particles.ParticleTypes;
+import net.minecraft.client.model.geom.ModelLayerLocation;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.MobSpawnInfo;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.animal.Chicken;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.CreativeModeTab;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShearsItem;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.MobSpawnSettings;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
@@ -38,12 +43,12 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
 import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -67,6 +72,8 @@ public class CrimsonChickens {
     public static final String MOD_ID = "crimsonchickens";
     public static final Logger LOGGER = LogManager.getLogger(CrimsonChickens.MOD_ID);
     public static final initConfigBuilder CONFIGURATION = new initConfigBuilder();
+
+    public static final ModelLayerLocation CHICKEN_NO_FEET = new ModelLayerLocation(new ResourceLocation(CrimsonChickens.MOD_ID, "chicken.nofeet"), "chicken.nofeet");
 
     public CrimsonChickens() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIGURATION.COMMON);
@@ -97,7 +104,7 @@ public class CrimsonChickens {
 
             if (chickenData.spawnNaturally) {
                 if (s.equals("chicken")) {
-                    List<MobSpawnInfo.Spawners> spawns = event.getSpawns().getSpawner(EntityClassification.CREATURE);
+                    List<MobSpawnSettings.SpawnerData> spawns = event.getSpawns().getSpawner(MobCategory.CREATURE);
 
 //        spawns.forEach(mob-> {
 //            if (mob.type == EntityType.CHICKEN)
@@ -105,20 +112,20 @@ public class CrimsonChickens {
 //        });
 
                     if (spawns.removeIf(e -> e.type == EntityType.CHICKEN))
-                        spawns.add(new MobSpawnInfo.Spawners(resourceChicken.get(), chickenData.spawnWeight, 4, 4));    // same as vanilla
+                        spawns.add(new MobSpawnSettings.SpawnerData(resourceChicken.get(), chickenData.spawnWeight, 4, 4));    // same as vanilla
 
                 } else {
                     String biomeString = '"' + event.getName().toString() + '"';
-                    EntityClassification classType;
+                    MobCategory classType;
 
                     switch (chickenData.spawnType) {
                         default:
                         case 0:
-                            classType = EntityClassification.CREATURE;
+                            classType = MobCategory.CREATURE;
                             break;
 
                         case 1:
-                            classType = EntityClassification.MONSTER;
+                            classType = MobCategory.MONSTER;
                             break;
                     }
 
@@ -126,7 +133,7 @@ public class CrimsonChickens {
                         if (chickenData.biomesWhitelist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_WHITELIST: " + biomeString + " : " + s);
 
-                            event.getSpawns().getSpawner(classType).add(new MobSpawnInfo.Spawners(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
+                            event.getSpawns().getSpawner(classType).add(new MobSpawnSettings.SpawnerData(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
                         }
 
                     } else if (chickenData.biomesBlacklist != null && chickenData.biomesBlacklist.size() != 0) {
@@ -134,20 +141,20 @@ public class CrimsonChickens {
                         if (! chickenData.biomesBlacklist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_BLACKLIST: " + biomeString + " : " + s);
 
-                            event.getSpawns().getSpawner(classType).add(new MobSpawnInfo.Spawners(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
+                            event.getSpawns().getSpawner(classType).add(new MobSpawnSettings.SpawnerData(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
                         }
 
                     } else {
                         //LOGGER.info("BIOME_NATURAL: " + biomeString + " : " + s);
 
-                        event.getSpawns().getSpawner(classType).add(new MobSpawnInfo.Spawners(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
+                        event.getSpawns().getSpawner(classType).add(new MobSpawnSettings.SpawnerData(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
                     }
                 }
             }
         });
     }
 
-    public static final ItemGroup TAB = new ItemGroup(CrimsonChickens.MOD_ID) {
+    public static final CreativeModeTab TAB = new CreativeModeTab(CrimsonChickens.MOD_ID) {
         @OnlyIn(Dist.CLIENT)
         @Override
         public ItemStack makeIcon() { return new ItemStack(Items.CHICKEN_SPAWN_EGG); }
@@ -165,7 +172,7 @@ public class CrimsonChickens {
 
 
         ResourceChickenEntity targetChicken = (ResourceChickenEntity) event.getTarget();
-        PlayerEntity player = event.getPlayer();
+        Player player = event.getPlayer();
 
         if (player.getMainHandItem().getItem() instanceof ShearsItem) {
             if (CONFIGURATION.allowShearingChickens.get()) {
@@ -173,13 +180,13 @@ public class CrimsonChickens {
                     playerIn.broadcastBreakEvent(event.getHand());
                 });
 
-                World world = event.getWorld();
+                Level world = event.getWorld();
                 BlockPos pos = event.getPos();
 
                 targetChicken.hurt(new DamageSource("death.attack.shears"), 1);
-                ((ServerWorld) world).sendParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + targetChicken.getEyeHeight(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
+                ((ServerLevel) world).sendParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + targetChicken.getEyeHeight(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
 
-                world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
+                world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundSource.PLAYERS, 1f, 1f);
 
                 world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(),
                     targetChicken.chickenData.hasTrait == 1
@@ -201,13 +208,13 @@ public class CrimsonChickens {
             ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
 
             if (chickenData.dropItemItem.equals(event.getPlayer().getMainHandItem().getItem().getRegistryName().toString())) {
-                CompoundNBT parentNBT = targetChicken.getPersistentData();
-                CompoundNBT NBT = parentNBT.getCompound("Mutation");
+                CompoundTag parentNBT = targetChicken.getPersistentData();
+                CompoundTag NBT = parentNBT.getCompound("Mutation");
 
                 // if converting a partly already converted chicken then reset/remove type/count
                 if (! chickenData.dropItemItem.equals(NBT.getString("type"))) {
                     targetChicken.getPersistentData().remove("Mutation");
-                    NBT = new CompoundNBT();
+                    NBT = new CompoundTag();
                 }
 
                 //  Store type/count were converting chicken into
@@ -216,10 +223,10 @@ public class CrimsonChickens {
                 targetChicken.getPersistentData().put("Mutation", NBT);
 
                 if (NBT.getInt("count") >= chickenData.conversion) {
-                    targetChicken.remove();
+                    targetChicken.remove(Entity.RemovalReason.DISCARDED);
 
-                    event.getWorld().playSound(null, event.getPos(), SoundEvents.GENERIC_EXPLODE, SoundCategory.AMBIENT, 1f, 1f);
-                    ((ServerWorld) event.getWorld()).sendParticles(ParticleTypes.POOF,
+                    event.getWorld().playSound(null, event.getPos(), SoundEvents.GENERIC_EXPLODE, SoundSource.AMBIENT, 1f, 1f);
+                    ((ServerLevel) event.getWorld()).sendParticles(ParticleTypes.POOF,
                         event.getPos().getX() + 0.5,
                         event.getPos().getY() + 0.5,
                         event.getPos().getZ() + 0.5,
@@ -243,7 +250,7 @@ public class CrimsonChickens {
                     event.getPlayer().getMainHandItem().shrink(1);
 
                 if (NBT.getInt("count") % 4 == 0) {
-                    ((ServerWorld) event.getWorld()).sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                    ((ServerLevel) event.getWorld()).sendParticles(ParticleTypes.HAPPY_VILLAGER,
                         event.getPos().getX() + 0.5,
                         event.getPos().getY() + 0.5,
                         event.getPos().getZ() + 0.5,
@@ -258,7 +265,7 @@ public class CrimsonChickens {
         if (event.getEntity() instanceof ResourceChickenEntity) return;
 
         // from spawners, spawn_eggs
-        if (event.getEntity() instanceof ChickenEntity) {
+        if (event.getEntity() instanceof Chicken) {
             event.setCanceled(true);
 
             ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData("chicken");
@@ -267,7 +274,7 @@ public class CrimsonChickens {
                     ResourceChickenEntity newChicken = initEntities.getModChickens().get("chicken").get().create(event.getWorld());
                     if (newChicken != null) {
                         // copy all/any NBT to new chicken, isBaby, Invulnerable, CustomName etc
-                        CompoundNBT compound = new CompoundNBT();
+                        CompoundTag compound = new CompoundTag();
                         event.getEntity().save(compound);
 
                         compound.putBoolean("analyzed", true);
@@ -287,28 +294,28 @@ public class CrimsonChickens {
 
     @SubscribeEvent
     public void onEntityDeath(LivingDeathEvent event) {
-        if (event.getEntity().level instanceof ServerWorld) {
-            if (event.getEntity() instanceof PlayerEntity) {
+        if (event.getEntity().level instanceof ServerLevel) {
+            if (event.getEntity() instanceof Player) {
                 if (initEntities.getModChickens().containsKey("grave")) {   // must be enabled else it wouldn't be loaded into the list
                     ResourceChickenEntity newChicken = initEntities.getModChickens().get("grave").get().create(event.getEntity().level);
 
                     if (newChicken != null) {
-                        PlayerEntity playerIn = (PlayerEntity) event.getEntity();
+                        Player playerIn = (Player) event.getEntity();
 
                         newChicken.setCustomName(playerIn.getDisplayName().copy()
                             .append(": Death #")
-                            .append("" + ((ServerPlayerEntity) playerIn).getStats().getValue(Stats.CUSTOM.get(Stats.DEATHS))));
+                            .append("" + ((ServerPlayer) playerIn).getStats().getValue(Stats.CUSTOM.get(Stats.DEATHS))));
 
                         newChicken.copyPosition(event.getEntity());
                         newChicken.setPersistenceRequired();
-                        newChicken.getPersistentData().put("Inventory", playerIn.inventory.save(new ListNBT()));
+                        newChicken.getPersistentData().put("Inventory", playerIn.getInventory().save(new ListTag()));
 
                         event.getEntity().level.addFreshEntity(newChicken);
 
                         // Note: might not work well with modded 'SoulBound' items ?
-                        playerIn.inventory.items.clear();
-                        playerIn.inventory.armor.clear();
-                        playerIn.inventory.offhand.clear();
+                        playerIn.getInventory().items.clear();
+                        playerIn.getInventory().armor.clear();
+                        playerIn.getInventory().offhand.clear();
                     }
                 }
             }
@@ -316,7 +323,7 @@ public class CrimsonChickens {
     }
 
     private void onFMLLoadCompleteEvent(FMLLoadCompleteEvent event) {
-        SupplierSpawnEggItem.initSpawnEggs();
+        //SupplierSpawnEggItem.initSpawnEggs();
     }
 
     private void onInterModEnqueueEvent(final InterModEnqueueEvent event) {

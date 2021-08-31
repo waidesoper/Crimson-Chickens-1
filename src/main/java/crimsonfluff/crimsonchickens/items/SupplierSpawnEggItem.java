@@ -3,17 +3,17 @@ package crimsonfluff.crimsonchickens.items;
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.world.World;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraft.ChatFormatting;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.SpawnEggItem;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
+import net.minecraftforge.fmllegacy.RegistryObject;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -43,49 +43,41 @@ public class SupplierSpawnEggItem extends SpawnEggItem {
     }
 
     @Override
-    public EntityType<?> getType(CompoundNBT compoundNBT) { return (EntityType<?>) supplier.get(); }
+    public EntityType<?> getType(CompoundTag compoundNBT) { return (EntityType<?>) supplier.get(); }
 
     @Override
-    public ITextComponent getName(ItemStack itemStack) { return new StringTextComponent(descriptionId); }
+    public Component getName(ItemStack itemStack) { return new TextComponent(descriptionId); }
 
     @Override
-    public ITextComponent getDescription() { return new StringTextComponent(descriptionId); }
-
-    public static void initSpawnEggs() {
-        for (final SpawnEggItem spawnEgg : eggsToAdd) BY_ID.put(spawnEgg.getType(null), spawnEgg);
-
-        eggsToAdd.clear();
-    }
+    public Component getDescription() { return new TextComponent(descriptionId); }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag flag) {
+    public void appendHoverText(ItemStack itemStack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flag) {
         super.appendHoverText(itemStack, worldIn, tooltip, flag);
 
         ResourceChickenData chickenData = ((SupplierSpawnEggItem)itemStack.getItem()).chickenData;
         if (chickenData != null) {
             if (chickenData.spawnNaturally) {
-                tooltip.add(new StringTextComponent(""));
-                tooltip.add(new StringTextComponent("Spawns naturally"));
+                tooltip.add(new TextComponent(""));
+                tooltip.add(new TextComponent("Spawns naturally"));
             }
 
             if (! chickenData.canBreed) {
-                tooltip.add(new StringTextComponent(""));
-                tooltip.add(new StringTextComponent("Cannot be bred"));
+                tooltip.add(new TextComponent(""));
+                tooltip.add(new TextComponent("Cannot be bred"));
             }
 
             if (! chickenData.parentA.isEmpty() && ! chickenData.parentB.isEmpty()) {
-                tooltip.add(new StringTextComponent(""));
-                tooltip.add(new StringTextComponent("Parents:"));
+                tooltip.add(new TextComponent(""));
+                tooltip.add(new TextComponent("Parents:"));
 
                 ResourceChickenData rce = ChickenRegistry.getRegistry().getChickenDataFromID(chickenData.parentA);
-                if (rce != null) tooltip.add(new StringTextComponent(" - " + rce.displayName));
-                else tooltip.add(new StringTextComponent(" - Unknown: " + chickenData.parentA).withStyle(TextFormatting.DARK_GRAY));
+                if (rce != null) tooltip.add(new TextComponent(" - " + rce.displayName));
+                else tooltip.add(new TextComponent(" - Unknown: " + chickenData.parentA).withStyle(ChatFormatting.DARK_GRAY));
 
                 rce = ChickenRegistry.getRegistry().getChickenDataFromID(chickenData.parentB);
-                if (rce != null) tooltip.add(new StringTextComponent(" - " + rce.displayName));
-                else tooltip.add(new StringTextComponent(" - Unknown: " + chickenData.parentB).withStyle(TextFormatting.DARK_GRAY));
-//                p_77624_3_.add(new StringTextComponent(" - " + ForgeRegistries.ENTITIES.getValue(new ResourceLocation(chickenData.parentA)).getDescriptionId()));
-//                p_77624_3_.add(new StringTextComponent(" - " + ForgeRegistries.ENTITIES.getValue(new ResourceLocation(chickenData.parentB)).getDescriptionId()));
+                if (rce != null) tooltip.add(new TextComponent(" - " + rce.displayName));
+                else tooltip.add(new TextComponent(" - Unknown: " + chickenData.parentB).withStyle(ChatFormatting.DARK_GRAY));
             }
         }
     }

@@ -7,14 +7,14 @@ import crimsonfluff.crimsonchickens.init.initEntities;
 import crimsonfluff.crimsonchickens.init.initItems;
 import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntitySpawnPlacementRegistry;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.gen.Heightmap;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.entity.SpawnPlacements;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
-import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.fmllegacy.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -22,7 +22,7 @@ public class RegistryHandler {
     public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, CrimsonChickens.MOD_ID);
 
     public static final RegistryObject<EntityType<DuckEggProjectileEntity>> DUCK_EGG = ENTITY_TYPES.register("duck_egg",
-        () -> EntityType.Builder.<DuckEggProjectileEntity>of(DuckEggProjectileEntity::new, EntityClassification.MISC)
+        () -> EntityType.Builder.<DuckEggProjectileEntity>of(DuckEggProjectileEntity::new, MobCategory.MISC)
             .sized(0.25F, 0.25F)
             .clientTrackingRange(4)
             .updateInterval(10)
@@ -32,7 +32,7 @@ public class RegistryHandler {
     public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
         initEntities.getModChickens().forEach((s, customChicken) -> {
             event.put(customChicken.get(), ResourceChickenEntity.createChickenAttributes(s).build());
-            EntitySpawnPlacementRegistry.register(customChicken.get(), EntitySpawnPlacementRegistry.PlacementType.ON_GROUND, Heightmap.Type.MOTION_BLOCKING_NO_LEAVES, (animal, world, reason, pos, random) -> true);
+            SpawnPlacements.register(customChicken.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (animal, world, reason, pos, random) -> true);
         });
     }
 
@@ -41,13 +41,13 @@ public class RegistryHandler {
 
         if (chickenData.isFireImmune) {
             customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
-                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), EntityClassification.CREATURE)
+                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), MobCategory.CREATURE)
                 .sized(0.4f, 0.7f)
                 .fireImmune()
                 .build(name + "_chicken"));
         } else {
             customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
-                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), EntityClassification.CREATURE)
+                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), MobCategory.CREATURE)
                 .sized(0.4f, 0.7f)
                 .build(name + "_chicken"));
         }
