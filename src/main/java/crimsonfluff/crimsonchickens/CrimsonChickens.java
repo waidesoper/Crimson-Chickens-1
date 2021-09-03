@@ -73,7 +73,7 @@ public class CrimsonChickens {
     public static final Logger LOGGER = LogManager.getLogger(CrimsonChickens.MOD_ID);
     public static final initConfigBuilder CONFIGURATION = new initConfigBuilder();
 
-    public static final ModelLayerLocation CHICKEN_NO_FEET = new ModelLayerLocation(new ResourceLocation(CrimsonChickens.MOD_ID, "chicken.nofeet"), "chicken.nofeet");
+    //public static final ModelLayerLocation CHICKEN_NO_FEET = new ModelLayerLocation(new ResourceLocation(CrimsonChickens.MOD_ID, "chicken.nofeet"), "chicken.nofeet");
 
     public CrimsonChickens() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, CONFIGURATION.COMMON);
@@ -129,14 +129,14 @@ public class CrimsonChickens {
                             break;
                     }
 
-                    if (chickenData.biomesWhitelist != null && chickenData.biomesWhitelist.size() != 0) {
+                    if (chickenData.biomesWhitelist != null) {
                         if (chickenData.biomesWhitelist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_WHITELIST: " + biomeString + " : " + s);
 
                             event.getSpawns().getSpawner(classType).add(new MobSpawnSettings.SpawnerData(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
                         }
 
-                    } else if (chickenData.biomesBlacklist != null && chickenData.biomesBlacklist.size() != 0) {
+                    } else if (chickenData.biomesBlacklist != null) {
 //                        if (! chickenData.biomesWhitelist.toString().contains(biomeString)) {
                         if (! chickenData.biomesBlacklist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_BLACKLIST: " + biomeString + " : " + s);
@@ -371,8 +371,7 @@ public class CrimsonChickens {
         }
 
         Random r = new Random();
-        if (r.nextInt(2) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.EGG_DUCK.get()) : new ItemStack(Items.EGG));
-        if (r.nextInt(2) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.FEATHER_DUCK.get()) : new ItemStack(Items.FEATHER));
+        if (r.nextInt(8) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.FEATHER_DUCK.get()) : new ItemStack(Items.FEATHER));
 
         return lst;
     }

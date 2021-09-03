@@ -68,6 +68,7 @@ public class LiquidEgg extends EggItem {
                     worldIn.addParticle(ParticleTypes.LARGE_SMOKE, (double) i + Math.random(), (double) j + Math.random(), (double) k + Math.random(), 0.0D, 0.0D, 0.0D);
                 }
 
+                playerIn.awardStat(Stats.ITEM_USED.get(this));
                 return InteractionResultHolder.sidedSuccess(itemstack, worldIn.isClientSide());
             }
 

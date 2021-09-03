@@ -1,15 +1,18 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/crimson-chickens",
   "promos": {
-    "1.17.1-latest": "1.0.1",
-    "1.17.1-recommended": "1.0.1"
+    "1.17.1-latest": "1.0.2",
+    "1.17.1-recommended": "1.0.2"
   },
   "1.16.5": {
     "1.0.0": "Initial Release. Official Mappings. Forge 36.2.2",
-    "1.0.1": "Nether chickens spawnType 0"
+    "1.0.1": "Configs fix",
+    "1.0.2": "Code Cleanup. Fixed Liquid Eggs. Fixed Nether Spawns ? Modded Chickens. Translations, Better Tooltips",
+    "1.0.3": "Fixed NPE. Stasis Baby Growth."
   },
   "1.17.1": {
     "1.0.0": "Initial Release. Official Mappings. Forge 37.0.44",
-    "1.0.1": "Added Copper Chicken, Fixed Liquid Eggs"
+    "1.0.1": "Added Copper Chicken, Fixed Liquid Eggs. Fixed Nether Spawns ?",
+    "1.0.2": "Fixed NPE. Stasis Baby Growth. Translatable"
   }
 }

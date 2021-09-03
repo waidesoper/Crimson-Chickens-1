@@ -3,16 +3,23 @@ package crimsonfluff.crimsonchickens.blocks;
 import com.google.gson.JsonParseException;
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.MyItemStackHandler;
+import crimsonfluff.crimsonchickens.init.initItems;
+import crimsonfluff.crimsonchickens.init.initSounds;
 import crimsonfluff.crimsonchickens.init.initTiles;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -99,7 +106,7 @@ public class NestTileEntity extends BlockEntity implements EntityBlock {
 
         if (this.entityCaptured != null) {
             this.entityCaptured.putInt("EggLayTime", this.eggLayTime);
-            this.entityCaptured.putInt("ChickenAge", this.chickenAge);
+            this.entityCaptured.putInt("Age", this.chickenAge);
             compound.put("entityCaptured", this.entityCaptured);
         }
 
@@ -121,8 +128,23 @@ public class NestTileEntity extends BlockEntity implements EntityBlock {
             this.chickenAge++;
             //chickenAge = calcNewAge(chickenAge, compound.getInt("strength"));
 
-            if (this.chickenAge >= 0)
-                this.eggLayTime = 1;   // should trigger code below to start egglay timer
+            if (this.chickenAge >= 0) {
+//                CrimsonChickens.LOGGER.info("HERE");
+
+                ((ServerLevel) this.level).sendParticles(new ItemParticleOption(ParticleTypes.ITEM, new ItemStack(initItems.NEST_BLOCK_ITEM.get())),
+                    worldPosition.getX() + 0.5, worldPosition.getY() + 0.2, worldPosition.getZ() + 0.5,
+                    10, 0.3, 0.2, 0.3,0);
+
+                this.level.playSound(null, worldPosition, this.level.random.nextInt(2) == 0
+                        ? SoundEvents.CHICKEN_EGG
+                        : this.chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT.get() : SoundEvents.CHICKEN_AMBIENT
+                    , SoundSource.PLAYERS, 1f, 1f);
+
+                this.entityCaptured.putInt("Age", this.chickenAge);       // Force Block Update
+                sendUpdates();                                                      // Force Block Update
+
+                this.eggLayTime = CrimsonChickens.calcNewEggLayTime(this.level.random, this.chickenData, this.chickenGrowth);
+            }
         }
 
         if (this.chickenAge >= 0) {

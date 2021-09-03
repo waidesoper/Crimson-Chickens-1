@@ -1,6 +1,7 @@
 package crimsonfluff.crimsonchickens.registry;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
+import crimsonfluff.crimsonchickens.entity.AngryChickenEntity;
 import crimsonfluff.crimsonchickens.entity.DuckEggProjectileEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.initEntities;
@@ -31,7 +32,11 @@ public class RegistryHandler {
 
     public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
         initEntities.getModChickens().forEach((s, customChicken) -> {
-            event.put(customChicken.get(), ResourceChickenEntity.createChickenAttributes(s).build());
+            if (s.equals("angry"))
+                event.put(customChicken.get(), AngryChickenEntity.createChickenAttributes(s).build());
+            else
+                event.put(customChicken.get(), ResourceChickenEntity.createChickenAttributes(s).build());
+
             SpawnPlacements.register(customChicken.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, (animal, world, reason, pos, random) -> true);
         });
     }
@@ -39,17 +44,25 @@ public class RegistryHandler {
     public static void registerChicken(String name, ResourceChickenData chickenData) {
         final RegistryObject<EntityType<? extends ResourceChickenEntity>> customChickenEntity;
 
-        if (chickenData.isFireImmune) {
+        if (name.equals("angry")) {
             customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
-                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), MobCategory.CREATURE)
+                .<ResourceChickenEntity>of((type, world) -> new AngryChickenEntity(type, world, chickenData), chickenData.spawnType == 0 ? MobCategory.CREATURE : MobCategory.MONSTER)
                 .sized(0.4f, 0.7f)
                 .fireImmune()
                 .build(name + "_chicken"));
         } else {
-            customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
-                .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), MobCategory.CREATURE)
-                .sized(0.4f, 0.7f)
-                .build(name + "_chicken"));
+            if (chickenData.isFireImmune) {
+                customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
+                    .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), chickenData.spawnType == 0 ? MobCategory.CREATURE : MobCategory.MONSTER)
+                    .sized(0.4f, 0.7f)
+                    .fireImmune()
+                    .build(name + "_chicken"));
+            } else {
+                customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder
+                    .<ResourceChickenEntity>of((type, world) -> new ResourceChickenEntity(type, world, chickenData), chickenData.spawnType == 0 ? MobCategory.CREATURE : MobCategory.MONSTER)
+                    .sized(0.4f, 0.7f)
+                    .build(name + "_chicken"));
+            }
         }
 
         final RegistryObject<Item> SPAWN_EGG = initItems.ITEMS.register(name + "_chicken_spawn_egg",

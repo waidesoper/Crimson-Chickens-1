@@ -33,8 +33,10 @@ public class NestRenderer implements BlockEntityRenderer<NestTileEntity> {
             RenderType renderType = chickenModel.renderType(tileEntity.chickenTexture);
             VertexConsumer vertexBuilder = buffer.getBuffer(renderType);
 
+            chickenModel.young = tileEntity.chickenAge < 0;
+
             matrixStack.pushPose();
-            matrixStack.translate(0.5f, 1.3f, 0.5f);
+            matrixStack.translate(0.5f, chickenModel.young ? 1.4f : 1.32f, 0.5f);
             matrixStack.mulPose(Vector3f.YN.rotationDegrees(direction.toYRot()));   // default facing is opposite so no need for +180
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));        // else they render upside down, because of course they do...
 
@@ -50,14 +52,16 @@ public class NestRenderer implements BlockEntityRenderer<NestTileEntity> {
 //                matrixStack.popPose();
 //            }
 //            else {
-            chickenModel.head.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-            chickenModel.beak.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-            chickenModel.comb.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//            }
+//            chickenModel.head.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+//            chickenModel.beak.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+//            chickenModel.comb.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+////            }
+//
+//            chickenModel.body.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+//            chickenModel.leftWing.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+//            chickenModel.rightWing.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
 
-            chickenModel.body.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-            chickenModel.leftWing.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-            chickenModel.rightWing.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
+            chickenModel.renderToBuffer(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
 
             matrixStack.popPose();
 

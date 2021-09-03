@@ -48,11 +48,13 @@ public class AnimalNet extends Item {
         ResourceChickenData chickenData = null;
         if (entityIn instanceof ResourceChickenEntity) {
             chickenData = ((ResourceChickenEntity) entityIn).chickenData;
+
             if (chickenData.name.equals("grave")) return InteractionResult.CONSUME;     // can't pick up grave chicken
+            if (chickenData.name.equals("angry")) return InteractionResult.CONSUME;     // can't pick up angry chicken
 
         } else {
-            // config.SpawnType=1 would mean Resource Chicken would be MONSTER classification
             if (entityIn.getClassification(false) == MobCategory.MONSTER) return InteractionResult.CONSUME;
+            if (entityIn instanceof Player) return InteractionResult.CONSUME;           // just in case?
         }
 
         // checks for ClientSide and isDamageable and Creative

@@ -6,7 +6,7 @@
       "crimsonchickens:duck_ambient_2",
       "crimsonchickens:duck_ambient_3"
     ],
-    "subtitle": "crimsonchickens.subtitle.duck_ambient"
+    "subtitle": "subtitle.crimsonchickens.duck_ambient"
   },
   "duck.hurt": {
     "category": "neutral",
@@ -15,7 +15,7 @@
       "crimsonchickens:duck_ambient_2",
       "crimsonchickens:duck_ambient_3"
     ],
-    "subtitle": "crimsonchickens.subtitle.duck_hurt"
+    "subtitle": "subtitle.crimsonchickens.duck_hurt"
   },
   "duck.death": {
     "category": "neutral",
@@ -24,6 +24,15 @@
         "name": "crimsonchickens:duck_death"
       }
     ],
-    "subtitle": "crimsonchickens.subtitle.duck_death"
+    "subtitle": "subtitle.crimsonchickens.duck_death"
+  },
+  "radiation": {
+    "category": "neutral",
+    "sounds": [
+      {
+        "name": "crimsonchickens:radiation"
+      }
+    ],
+    "subtitle": "subtitle.crimsonchickens.radiation"
   }
 }

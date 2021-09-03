@@ -5,7 +5,7 @@ issueTrackerURL="https://github.com/MeinKraft/Crimson-Chickens/issues"
 
 [[mods]]
 modId="crimsonchickens"
-version="1.17.1-1.0.0"
+version="1.17.1-1.0.2"
 displayName="Crimson Chickens"
 displayURL="http://crimsonfluff.com/"
 updateJSONURL = "https://github.com/MeinKraft/Crimson-Chickens/raw/1.17.1/update.json"

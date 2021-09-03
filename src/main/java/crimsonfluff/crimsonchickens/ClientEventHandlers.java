@@ -42,7 +42,7 @@ public class ClientEventHandlers {
 
     public static void clientStuff() {
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::registerRenderers);
-        FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::registerLayerDefinitions);
+        //FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::registerLayerDefinitions);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::onColorHandlerEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::onModelRegistryEvent);
         FMLJavaModLoadingContext.get().getModEventBus().addListener(ClientEventHandlers::onModelBakeEvent);
@@ -61,9 +61,9 @@ public class ClientEventHandlers {
         event.registerBlockEntityRenderer(initTiles.NEST_BLOCK_TILE.get(), NestRenderer::new);
     }
 
-    private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
-        event.registerLayerDefinition(CrimsonChickens.CHICKEN_NO_FEET, NestChickenModel::createBodyLayer);
-    }
+//    private static void registerLayerDefinitions(EntityRenderersEvent.RegisterLayerDefinitions event) {
+//        event.registerLayerDefinition(CrimsonChickens.CHICKEN_NO_FEET, NestChickenModel::createBodyLayer);
+//    }
 
     private static void onModelBakeEvent(ModelBakeEvent event) {
         Map<ResourceLocation, BakedModel> modelRegistry = event.getModelRegistry();
