@@ -3,9 +3,6 @@ package crimsonfluff.crimsonchickens.blocks;
 import crimsonfluff.crimsonchickens.compat.ITOPInfoProvider;
 import crimsonfluff.crimsonchickens.init.initTiles;
 import mcjty.theoneprobe.api.*;
-import mcp.mobius.waila.api.BlockAccessor;
-import mcp.mobius.waila.api.ITooltip;
-import net.minecraft.ChatFormatting;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -64,38 +61,38 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
     @Override
     public VoxelShape getShape(BlockState p_48816_, BlockGetter p_48817_, BlockPos p_48818_, CollisionContext p_48819_) {
         return Stream.of(Block.box(12, 2.1, 5, 13, 3.1, 7),
-            Block.box(5, 0.1, 5, 11, 1.1, 11),
-            Block.box(12, 1.1, 7, 13, 2.1, 9),
-            Block.box(3, 1.1, 7, 4, 2.1, 9),
-            Block.box(4, 0.1, 7, 5, 1.1, 9),
-            Block.box(11, 0.1, 7, 12, 1.1, 9),
-            Block.box(7, 1.1, 3, 9, 2.1, 4),
-            Block.box(7, 0.1, 4, 9, 1.1, 5),
-            Block.box(7, 0.1, 11, 9, 1.1, 12),
-            Block.box(7, 1.1, 12, 9, 2.1, 13),
-            Block.box(4, 1.1, 9, 5, 2.1, 11),
-            Block.box(11, 1.1, 9, 12, 2.1, 11),
-            Block.box(11, 2.1, 11, 12, 3.1, 12),
-            Block.box(11, 2.1, 4, 12, 3.1, 5),
-            Block.box(4, 2.1, 4, 5, 3.1, 5),
-            Block.box(4, 2.1, 11, 5, 3.1, 12),
-            Block.box(11, 1.1, 5, 12, 2.1, 7),
-            Block.box(4, 1.1, 5, 5, 2.1, 7),
-            Block.box(13, 2.1, 7, 14, 3.1, 9),
-            Block.box(2, 2.1, 7, 3, 3.1, 9),
-            Block.box(7, 2.1, 2, 9, 3.1, 3),
-            Block.box(7, 2.1, 13, 9, 3.1, 14),
-            Block.box(12, 2.1, 9, 13, 3.1, 11),
-            Block.box(9, 2.1, 12, 11, 3.1, 13),
-            Block.box(5, 2.1, 12, 7, 3.1, 13),
-            Block.box(5, 1.1, 11, 7, 2.1, 12),
-            Block.box(5, 1.1, 4, 7, 2.1, 5),
-            Block.box(9, 1.1, 4, 11, 2.1, 5),
-            Block.box(9, 1.1, 11, 11, 2.1, 12),
-            Block.box(3, 2.1, 9, 4, 3.1, 11),
-            Block.box(3, 2.1, 5, 4, 3.1, 7),
-            Block.box(5, 2.1, 3, 7, 3.1, 4),
-            Block.box(9, 2.1, 3, 11, 3.1, 4))
+                Block.box(5, 0.1, 5, 11, 1.1, 11),
+                Block.box(12, 1.1, 7, 13, 2.1, 9),
+                Block.box(3, 1.1, 7, 4, 2.1, 9),
+                Block.box(4, 0.1, 7, 5, 1.1, 9),
+                Block.box(11, 0.1, 7, 12, 1.1, 9),
+                Block.box(7, 1.1, 3, 9, 2.1, 4),
+                Block.box(7, 0.1, 4, 9, 1.1, 5),
+                Block.box(7, 0.1, 11, 9, 1.1, 12),
+                Block.box(7, 1.1, 12, 9, 2.1, 13),
+                Block.box(4, 1.1, 9, 5, 2.1, 11),
+                Block.box(11, 1.1, 9, 12, 2.1, 11),
+                Block.box(11, 2.1, 11, 12, 3.1, 12),
+                Block.box(11, 2.1, 4, 12, 3.1, 5),
+                Block.box(4, 2.1, 4, 5, 3.1, 5),
+                Block.box(4, 2.1, 11, 5, 3.1, 12),
+                Block.box(11, 1.1, 5, 12, 2.1, 7),
+                Block.box(4, 1.1, 5, 5, 2.1, 7),
+                Block.box(13, 2.1, 7, 14, 3.1, 9),
+                Block.box(2, 2.1, 7, 3, 3.1, 9),
+                Block.box(7, 2.1, 2, 9, 3.1, 3),
+                Block.box(7, 2.1, 13, 9, 3.1, 14),
+                Block.box(12, 2.1, 9, 13, 3.1, 11),
+                Block.box(9, 2.1, 12, 11, 3.1, 13),
+                Block.box(5, 2.1, 12, 7, 3.1, 13),
+                Block.box(5, 1.1, 11, 7, 2.1, 12),
+                Block.box(5, 1.1, 4, 7, 2.1, 5),
+                Block.box(9, 1.1, 4, 11, 2.1, 5),
+                Block.box(9, 1.1, 11, 11, 2.1, 12),
+                Block.box(3, 2.1, 9, 4, 3.1, 11),
+                Block.box(3, 2.1, 5, 4, 3.1, 7),
+                Block.box(5, 2.1, 3, 7, 3.1, 4),
+                Block.box(9, 2.1, 3, 11, 3.1, 4))
             .reduce((v1, v2) -> Shapes.join(v1, v2, BooleanOp.OR)).get();
     }
 
@@ -109,7 +106,7 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
     @Override
     @Nullable
     public <T extends BlockEntity> BlockEntityTicker<T> getTicker(Level level, BlockState blockState, BlockEntityType<T> blockEntityType) {
-        return !level.isClientSide ? createTickerHelper(blockEntityType, initTiles.NEST_BLOCK_TILE.get(),
+        return ! level.isClientSide ? createTickerHelper(blockEntityType, initTiles.NEST_BLOCK_TILE.get(),
             (level1, blockPos, blockState1, te) -> te.tick()) : null;
     }
 
@@ -124,7 +121,7 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
         builder.add(FACING);
     }
 
-    public RenderShape getRenderShape(BlockState state) { return RenderShape.MODEL; }
+    public RenderShape getRenderShape(BlockState state) {return RenderShape.MODEL;}
 
     public BlockState rotate(BlockState state, Rotation rotation) {
         return state.setValue(FACING, rotation.rotate(state.getValue(FACING)));
@@ -136,7 +133,7 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
 
     @Nullable
     @Override
-    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) { return new NestTileEntity(pos, state); }
+    public BlockEntity newBlockEntity(BlockPos pos, BlockState state) {return new NestTileEntity(pos, state);}
 
     @Override
     public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult p_225533_6_) {
@@ -159,7 +156,7 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
                 double d1 = this.RANDOM.nextGaussian() * 0.2D;
                 double d2 = this.RANDOM.nextGaussian() * 0.2D;
 
-                ((ServerLevel) world).sendParticles(ParticleTypes.HEART, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, d0, d1, d2,0);
+                ((ServerLevel) world).sendParticles(ParticleTypes.HEART, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, d0, d1, d2, 0);
             }
 
             if (! player.getAbilities().instabuild) itemStack.shrink(1);
@@ -231,14 +228,16 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
 
             int secs;
             if (te.chickenAge < 0) {
-                secs = -te.chickenAge / 20;
+                secs = - te.chickenAge / 20;
                 iProbeInfo.text(new TextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
 
-            } else {
+            }
+            else {
                 if (te.storedItems.getStackInSlot(0).isEmpty()) {
                     iProbeInfo.text(CompoundText.create().style(TextStyleClass.WARNING).text("Requires seeds"));
 
-                } else {
+                }
+                else {
                     if (te.entityCaptured.getInt("EggLayTime") != 0) {
                         secs = te.eggLayTime / 20;
                         iProbeInfo.text(new TextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
@@ -247,39 +246,4 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
             }
         }
     }
-
-
-    public void AddWailaInfo(ITooltip iTooltip, BlockAccessor blockAccessor) {
-        NestTileEntity te = (NestTileEntity) blockAccessor.getBlockEntity(); //blockAccessor.getLevel().getBlockEntity(blockAccessor.getPosition());
-        if (te == null) return;
-
-        if (te.entityCaptured != null) {
-            iTooltip.add(new TextComponent(te.entityDescription));
-
-            if (te.entityCustomName != null)
-                iTooltip.add(te.entityCustomName);
-
-            if (te.entityCaptured.getBoolean("analyzed")) {
-                iTooltip.add(new TranslatableComponent("tip.crimsonchickens.growth", te.chickenGrowth));
-                iTooltip.add(new TranslatableComponent("tip.crimsonchickens.gain", te.chickenGain));
-                iTooltip.add(new TranslatableComponent("tip.crimsonchickens.strength", te.chickenStrength));
-            }
-
-//            int secs;
-//            if (te.chickenAge < 0) {
-//                secs = -te.chickenAge / 20;
-//                iTooltip.add(new TextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
-//
-//            } else {
-//                if (te.storedItems.getStackInSlot(0).isEmpty()) {
-//                    iTooltip.add(new TextComponent("Requires seeds").withStyle(ChatFormatting.YELLOW));
-//
-//                } else {
-//                    if (te.entityCaptured.getInt("EggLayTime") != 0) {
-//                        secs = te.eggLayTime / 20;
-//                        iTooltip.add(new TextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
-//                    }
-//                }
-//            }
-        }
-    }}
+}

@@ -6,7 +6,6 @@ import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
-import net.minecraft.client.model.geom.ModelLayerLocation;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.particles.ParticleTypes;

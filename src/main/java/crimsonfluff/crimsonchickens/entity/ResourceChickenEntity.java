@@ -17,7 +17,6 @@ import mcjty.theoneprobe.api.IProbeHitEntityData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
 import mcp.mobius.waila.api.ITooltip;
-import net.minecraft.client.renderer.EffectInstance;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -620,23 +619,25 @@ public class ResourceChickenEntity extends Chicken implements ITOPInfoEntityProv
 
     @Override
     public void addProbeEntityInfo(ProbeMode mode, IProbeInfo probeInfo, Player player, Level world, Entity entity, IProbeHitEntityData data) {
-        ResourceChickenEntity chicken = (ResourceChickenEntity) entity;
-        if (chicken.entityData.get(ANALYZED)) {
-            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.growth", chicken.entityData.get(GROWTH)));
-            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.gain", chicken.entityData.get(GAIN)));
-            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.strength", chicken.entityData.get(STRENGTH)));
+        //ResourceChickenEntity chicken = (ResourceChickenEntity) entity;
+        if (this.entityData.get(ANALYZED)) {
+            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.growth", this.entityData.get(GROWTH)));
+            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.gain", this.entityData.get(GAIN)));
+            probeInfo.text(new TranslatableComponent("tip.crimsonchickens.strength", this.entityData.get(STRENGTH)));
         }
 
-        if (! chicken.isBaby()) {
+        if (! this.isBaby()) {
             if (chickenData.eggLayTime != 0) {
-                int secs = chicken.eggTime / 20;
+                int secs = this.eggTime / 20;
                 probeInfo.text(new TranslatableComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
             }
         }
     }
 
     public void addWailaEntityInfo(ITooltip tooltip) {
-        //ResourceChickenEntity chicken = (ResourceChickenEntity) accessor.getEntity();
+        // todo: remove 'eggDrop' and replace with 'Next Drop'
+        //tooltip.clear();        // removes healthbar and egg drop time
+
         if (this.entityData.get(ANALYZED)) {
             tooltip.add(new TranslatableComponent("tip.crimsonchickens.growth", this.entityData.get(GROWTH)));
             tooltip.add(new TranslatableComponent("tip.crimsonchickens.gain", this.entityData.get(GAIN)));
@@ -644,7 +645,7 @@ public class ResourceChickenEntity extends Chicken implements ITOPInfoEntityProv
         }
 
 //        if (! this.isBaby()) {
-//            if (chickenData.eggLayTime != 0) {
+//            if (this.chickenData.eggLayTime != 0) {
 //                int secs = this.eggTime / 20;
 //                tooltip.add(new TranslatableComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
 //            }

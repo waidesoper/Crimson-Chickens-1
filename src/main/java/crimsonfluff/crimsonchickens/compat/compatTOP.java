@@ -45,7 +45,6 @@ public class compatTOP {
 
                 @Override
                 public void addProbeInfo(ProbeMode probeMode, IProbeInfo iProbeInfo, Player playerEntity, Level world, BlockState blockState, IProbeHitData iProbeHitData) {
-//                    if (blockState.getBlock() == initBlocks.NEST_BLOCK.get()) {
                     if (blockState.getBlock() instanceof ITOPInfoProvider) {
                         ITOPInfoProvider provider = (ITOPInfoProvider) blockState.getBlock();
                         provider.addProbeInfo(probeMode, iProbeInfo, playerEntity, world, blockState, iProbeHitData);

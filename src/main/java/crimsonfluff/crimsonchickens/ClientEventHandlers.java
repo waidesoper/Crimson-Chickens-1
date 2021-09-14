@@ -2,7 +2,6 @@ package crimsonfluff.crimsonchickens;
 
 import com.google.common.collect.LinkedHashMultimap;
 import com.google.common.collect.Multimap;
-import crimsonfluff.crimsonchickens.blocks.NestChickenModel;
 import crimsonfluff.crimsonchickens.blocks.NestRenderer;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenRenderer;
 import crimsonfluff.crimsonchickens.init.initBlocks;

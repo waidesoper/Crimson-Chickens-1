@@ -49,15 +49,10 @@ configurations {
 dependencies {
     minecraft "net.minecraftforge:forge:${minecraft_version}-${forge_version}"
 
-//    compileOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}:api")
-//    runtimeOnly fg.deobf("mezz.jei:jei-${minecraft_version}:${jei_version}")
-
-	compileOnly fg.deobf("top.theillusivec4.curios:curios-forge:${minecraft_version}-${curios_version}:api")
-    runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${minecraft_version}-${curios_version}")
-
+    implementation fg.deobf("curse.maven:curios-309927:3457073")
     implementation fg.deobf("curse.maven:the-one-probe-245211:3430022")
-    implementation fg.deobf("curse.maven:jei-238222:3438501")
-    implementation fg.deobf("curse.maven:jade-324717:3425040")      // WAILA Fork
+    implementation fg.deobf("curse.maven:jei-238222:3448057")
+    implementation fg.deobf("curse.maven:jade-324717:3447700")              // WAILA Fork
 }
 
 minecraft {
@@ -130,23 +125,8 @@ jar {
     ])
 }
 
-task deobfJar(type: Jar) {
-    duplicatesStrategy(DuplicatesStrategy.FAIL)
-    archiveClassifier.set('deobf')
-    from sourceSets.main.output
-    from sourceSets.api.output
-}
-
 artifacts {
-    archives jar, deobfJar
-}
-
-reobf {
-    jar { classpath.from(sourceSets.main.compileClasspath) }
-}
-
-task reobf {
-    dependsOn reobfJar
+    archives jar
 }
 
 repositories {

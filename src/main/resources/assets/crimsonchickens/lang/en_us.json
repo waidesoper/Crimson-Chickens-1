@@ -34,5 +34,7 @@
   "subtitle.crimsonchickens.duck_ambient": "Duck quacks",
   "subtitle.crimsonchickens.duck_hurt": "Duck hurt",
   "subtitle.crimsonchickens.duck_death": "Duck dies",
-  "subtitle.crimsonchickens.radiation": "Chicken radiation"
+  "subtitle.crimsonchickens.radiation": "Chicken radiation",
+
+  "jade.nextEgg": "Next Drop: %ds"
 }
