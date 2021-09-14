@@ -16,6 +16,6 @@ public class WailaJadePlugin implements IWailaPlugin {
         registrar.registerBlockDataProvider(new NestTileEntityProvider(), NestTileEntity.class);
         registrar.registerComponentProvider(new NestComponentProvider(), TooltipPosition.BODY, Nest.class);
 
-        registrar.registerComponentProvider((tooltip, accessor, config) -> { ((ResourceChickenEntity) accessor.getEntity()).addWailaEntityInfo(tooltip); }, TooltipPosition.BODY, ResourceChickenEntity.class);
+        registrar.registerComponentProvider(new WailaEntityProvider(), TooltipPosition.BODY, ResourceChickenEntity.class);
     }
 }

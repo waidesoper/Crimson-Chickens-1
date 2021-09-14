@@ -16,6 +16,7 @@ import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import mcjty.theoneprobe.api.IProbeHitEntityData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
+import mcp.mobius.waila.api.EntityAccessor;
 import mcp.mobius.waila.api.ITooltip;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -634,19 +635,20 @@ public class ResourceChickenEntity extends Chicken implements ITOPInfoEntityProv
         }
     }
 
-    public void addWailaEntityInfo(ITooltip tooltip) {
+    public void addWailaEntityInfo(ITooltip tooltip, EntityAccessor entityAccessor) {
         // todo: remove 'eggDrop' and replace with 'Next Drop'
         //tooltip.clear();        // removes healthbar and egg drop time
 
-        if (this.entityData.get(ANALYZED)) {
-            tooltip.add(new TranslatableComponent("tip.crimsonchickens.growth", this.entityData.get(GROWTH)));
-            tooltip.add(new TranslatableComponent("tip.crimsonchickens.gain", this.entityData.get(GAIN)));
-            tooltip.add(new TranslatableComponent("tip.crimsonchickens.strength", this.entityData.get(STRENGTH)));
+        ResourceChickenEntity chicken = (ResourceChickenEntity) entityAccessor.getEntity();
+        if (chicken.entityData.get(ANALYZED)) {
+            tooltip.add(new TranslatableComponent("tip.crimsonchickens.growth", chicken.entityData.get(GROWTH)));
+            tooltip.add(new TranslatableComponent("tip.crimsonchickens.gain", chicken.entityData.get(GAIN)));
+            tooltip.add(new TranslatableComponent("tip.crimsonchickens.strength", chicken.entityData.get(STRENGTH)));
         }
 
-//        if (! this.isBaby()) {
-//            if (this.chickenData.eggLayTime != 0) {
-//                int secs = this.eggTime / 20;
+//        if (! chicken.isBaby()) {
+//            if (chicken.chickenData.eggLayTime != 0) {
+//                int secs = chicken.eggTime / 20;
 //                tooltip.add(new TranslatableComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
 //            }
 //        }

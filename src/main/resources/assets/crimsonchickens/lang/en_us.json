@@ -30,6 +30,8 @@
   "tip.crimsonchickens.spawns": "Spawns naturally:",
   "tip.crimsonchickens.bred": "Cannot be bred",
   "tip.crimsonchickens.unknown": " - Unknown: %s",
+  "tip.crimsonchickens.growing": "Growing Time: %s",
+  "tip.crimsonchickens.seeds": "Requires Seeds",
 
   "subtitle.crimsonchickens.duck_ambient": "Duck quacks",
   "subtitle.crimsonchickens.duck_hurt": "Duck hurt",

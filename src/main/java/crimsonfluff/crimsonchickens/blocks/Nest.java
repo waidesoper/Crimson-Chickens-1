@@ -229,18 +229,18 @@ public class Nest extends BaseEntityBlock implements ITOPInfoProvider {
             int secs;
             if (te.chickenAge < 0) {
                 secs = - te.chickenAge / 20;
-                iProbeInfo.text(new TextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                iProbeInfo.text(new TranslatableComponent("tip.crimsonchickens.growing", String.format("%02d:%02d", secs / 60, secs % 60)));
 
             }
             else {
                 if (te.storedItems.getStackInSlot(0).isEmpty()) {
-                    iProbeInfo.text(CompoundText.create().style(TextStyleClass.WARNING).text("Requires seeds"));
+                    iProbeInfo.text(CompoundText.create().style(TextStyleClass.WARNING).text(new TranslatableComponent("tip.crimsonchickens.seeds")));
 
                 }
                 else {
                     if (te.entityCaptured.getInt("EggLayTime") != 0) {
                         secs = te.eggLayTime / 20;
-                        iProbeInfo.text(new TextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                        iProbeInfo.text(new TranslatableComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
                     }
                 }
             }

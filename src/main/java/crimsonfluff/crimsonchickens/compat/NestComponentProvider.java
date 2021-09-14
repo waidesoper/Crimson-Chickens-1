@@ -34,16 +34,16 @@ public class NestComponentProvider implements IComponentProvider {
                 int secs;
                 if (chickenAge < 0) {
                     secs = -chickenAge / 20;
-                    tooltip.add(new TextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                    tooltip.add(new TranslatableComponent("tip.crimsonchickens.growing", String.format("%02d:%02d", secs / 60, secs % 60)));
 
                 } else {
                     if (requiresSeeds) {
-                        tooltip.add(new TextComponent("Requires seeds").withStyle(ChatFormatting.YELLOW));
+                        tooltip.add(new TranslatableComponent("tip.crimsonchickens.seeds").withStyle(ChatFormatting.YELLOW));
 
                     } else {
                         if (eggLayTime != 0) {
                             secs = eggLayTime / 20;
-                            tooltip.add(new TextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                            tooltip.add(new TranslatableComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
                         }
                     }
                 }

@@ -51,7 +51,7 @@ dependencies {
 
     implementation fg.deobf("curse.maven:curios-309927:3457073")
     implementation fg.deobf("curse.maven:the-one-probe-245211:3430022")
-    implementation fg.deobf("curse.maven:jei-238222:3448057")
+    implementation fg.deobf("curse.maven:jei-238222:3438501")
     implementation fg.deobf("curse.maven:jade-324717:3447700")              // WAILA Fork
 }
 
