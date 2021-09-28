@@ -16,4 +16,6 @@ public class initSounds {
         public static final RegistryObject<SoundEvent> DUCK_DEATH = SOUNDS.register("duck.death",
                 () -> new SoundEvent(new ResourceLocation(CrimsonChickens.MOD_ID, "duck.death")));
 
+        public static final RegistryObject<SoundEvent> RADIATION = SOUNDS.register("radiation",
+                () -> new SoundEvent(new ResourceLocation(CrimsonChickens.MOD_ID, "radiation")));
 }

@@ -1,6 +1,7 @@
 package crimsonfluff.crimsonchickens;
 
 import crimsonfluff.crimsonchickens.compat.compatTOP;
+import crimsonfluff.crimsonchickens.entity.AngryChickenEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
@@ -9,21 +10,17 @@ import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ShearsItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
-import net.minecraft.util.*;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.biome.MobSpawnInfo;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,14 +28,12 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.event.world.BiomeLoadingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
@@ -49,7 +44,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 //  /forge entity list
@@ -122,15 +116,14 @@ public class CrimsonChickens {
                             break;
                     }
 
-                    if (chickenData.biomesWhitelist != null && chickenData.biomesWhitelist.size() != 0) {
+                    if (chickenData.biomesWhitelist != null) {
                         if (chickenData.biomesWhitelist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_WHITELIST: " + biomeString + " : " + s);
 
                             event.getSpawns().getSpawner(classType).add(new MobSpawnInfo.Spawners(resourceChicken.get(), chickenData.spawnWeight, 1, 4));
                         }
 
-                    } else if (chickenData.biomesBlacklist != null && chickenData.biomesBlacklist.size() != 0) {
-//                        if (! chickenData.biomesWhitelist.toString().contains(biomeString)) {
+                    } else if (chickenData.biomesBlacklist != null) {
                         if (! chickenData.biomesBlacklist.toString().contains(biomeString)) {
                             //LOGGER.info("BIOME_BLACKLIST: " + biomeString + " : " + s);
 
@@ -154,108 +147,9 @@ public class CrimsonChickens {
     };
 
     @SubscribeEvent
-    public void onPlayerEntityInteract(PlayerInteractEvent.EntityInteract event) {
-    // fired once per hand !, so twice !!
-        if (event.getSide().isClient()) return;
-
-        if (event.getPlayer().getMainHandItem().isEmpty()) return;
-        if (event.getPlayer().getUsedItemHand() != event.getHand()) return;     // !!
-
-        if (! (event.getTarget() instanceof ResourceChickenEntity)) return;
-
-
-        ResourceChickenEntity targetChicken = (ResourceChickenEntity) event.getTarget();
-        PlayerEntity player = event.getPlayer();
-
-        if (player.getMainHandItem().getItem() instanceof ShearsItem) {
-            if (CONFIGURATION.allowShearingChickens.get()) {
-                player.getMainHandItem().hurtAndBreak(1, player, playerIn -> {
-                    playerIn.broadcastBreakEvent(event.getHand());
-                });
-
-                World world = event.getWorld();
-                BlockPos pos = event.getPos();
-
-                targetChicken.hurt(new DamageSource("death.attack.shears"), 1);
-                ((ServerWorld) world).sendParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + targetChicken.getEyeHeight(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
-
-                world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
-
-                world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(),
-                    targetChicken.chickenData.hasTrait == 1
-                    ? new ItemStack(initItems.FEATHER_DUCK.get())
-                    : new ItemStack(Items.FEATHER)));
-            }
-
-            return;
-        }
-
-        // are we converting a chicken?
-        // only allow converting 'vanilla' chickens
-
-        if (! CONFIGURATION.allowConvertingVanilla.get()) return;
-        if (! targetChicken.chickenData.name.equals("chicken")) return;
-
-        for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
-            String name = entry.getKey();
-            ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
-
-            if (chickenData.dropItemItem.equals(event.getPlayer().getMainHandItem().getItem().getRegistryName().toString())) {
-                CompoundNBT parentNBT = targetChicken.getPersistentData();
-                CompoundNBT NBT = parentNBT.getCompound("Mutation");
-
-                // if converting a partly already converted chicken then reset/remove type/count
-                if (! chickenData.dropItemItem.equals(NBT.getString("type"))) {
-                    targetChicken.getPersistentData().remove("Mutation");
-                    NBT = new CompoundNBT();
-                }
-
-                //  Store type/count were converting chicken into
-                NBT.putString("type", chickenData.dropItemItem);
-                NBT.putInt("count", NBT.getInt("count") + 1);
-                targetChicken.getPersistentData().put("Mutation", NBT);
-
-                if (NBT.getInt("count") >= chickenData.conversion) {
-                    targetChicken.remove();
-
-                    event.getWorld().playSound(null, event.getPos(), SoundEvents.GENERIC_EXPLODE, SoundCategory.AMBIENT, 1f, 1f);
-                    ((ServerWorld) event.getWorld()).sendParticles(ParticleTypes.POOF,
-                        event.getPos().getX() + 0.5,
-                        event.getPos().getY() + 0.5,
-                        event.getPos().getZ() + 0.5,
-                        200, 1, 1, 1, 0);
-
-                    ResourceChickenEntity newChick = initEntities.getModChickens().get(chickenData.name).get().create(event.getWorld());
-                    newChick.copyPosition(targetChicken);
-
-                    if (targetChicken.hasCustomName()) {
-                        newChick.setCustomName(targetChicken.getCustomName());
-                        newChick.setCustomNameVisible(targetChicken.isCustomNameVisible());
-                    }
-
-                    newChick.setInvulnerable(targetChicken.isInvulnerable());
-
-//                        newChick.setYHeadRot(targetChicken.getYHeadRot());
-                    event.getWorld().addFreshEntity(newChick);
-                }
-
-                if (! event.getPlayer().isCreative())
-                    event.getPlayer().getMainHandItem().shrink(1);
-
-                if (NBT.getInt("count") % 4 == 0) {
-                    ((ServerWorld) event.getWorld()).sendParticles(ParticleTypes.HAPPY_VILLAGER,
-                        event.getPos().getX() + 0.5,
-                        event.getPos().getY() + 0.5,
-                        event.getPos().getZ() + 0.5,
-                        200, 1, 1, 1, 0);
-                }
-            }
-        }
-    }
-
-    @SubscribeEvent
     public void onEntityJoinWorldEvent(EntityJoinWorldEvent event) {
         if (event.getEntity() instanceof ResourceChickenEntity) return;
+        if (event.getEntity() instanceof AngryChickenEntity) return;
 
         // from spawners, spawn_eggs
         if (event.getEntity() instanceof ChickenEntity) {
@@ -364,8 +258,7 @@ public class CrimsonChickens {
         }
 
         Random r = new Random();
-        if (r.nextInt(2) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.EGG_DUCK.get()) : new ItemStack(Items.EGG));
-        if (r.nextInt(2) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.FEATHER_DUCK.get()) : new ItemStack(Items.FEATHER));
+        if (r.nextInt(8) == 0) lst.add(chickenData.hasTrait == 1 ? new ItemStack(initItems.FEATHER_DUCK.get()) : new ItemStack(Items.FEATHER));
 
         return lst;
     }

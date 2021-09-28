@@ -10,23 +10,28 @@ package crimsonfluff.crimsonchickens.entity;
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.compat.ITOPInfoEntityProvider;
 import crimsonfluff.crimsonchickens.init.initEntities;
+import crimsonfluff.crimsonchickens.init.initItems;
 import crimsonfluff.crimsonchickens.init.initSounds;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import mcjty.theoneprobe.api.IProbeHitEntityData;
 import mcjty.theoneprobe.api.IProbeInfo;
 import mcjty.theoneprobe.api.ProbeMode;
-import mcp.mobius.waila.api.IEntityAccessor;
 import net.minecraft.block.BlockState;
-import net.minecraft.entity.*;
+import net.minecraft.entity.AgeableEntity;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ShearsItem;
 import net.minecraft.item.crafting.Ingredient;
 import net.minecraft.loot.LootContext;
 import net.minecraft.loot.LootParameterSets;
@@ -38,6 +43,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.Effects;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.*;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -53,6 +59,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.fml.RegistryObject;
+import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
 import javax.annotation.ParametersAreNonnullByDefault;
@@ -61,11 +68,17 @@ import java.util.*;
 @ParametersAreNonnullByDefault
 public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEntityProvider {
     private static final Ingredient FOOD_ITEMS = Ingredient.of(Items.WHEAT_SEEDS, Items.MELON_SEEDS, Items.PUMPKIN_SEEDS, Items.BEETROOT_SEEDS);
-    private static final DataParameter<Boolean> ANALYZED = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Integer> GROWTH = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
-    private static final DataParameter<Integer> GAIN = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
-    private static final DataParameter<Integer> STRENGTH = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
+    public static final DataParameter<Boolean> ANALYZED = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.BOOLEAN);
+    public static final DataParameter<Integer> GROWTH = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
+    public static final DataParameter<Integer> GAIN = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
+    public static final DataParameter<Integer> STRENGTH = EntityDataManager.defineId(ResourceChickenEntity.class, DataSerializers.INT);
     public ResourceChickenData chickenData;
+
+    // cached for performance (from NBT)
+    public String conversionType = "";
+    public String conversionDescID = "";
+    public int conversionRequired = 0;
+    public int conversionCount = 0;
 
     //public int eggTime;
     private int noJumpDelay;
@@ -102,12 +115,6 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         return new StringTextComponent(chickenData.displayName);
     }
 
-//    @Override
-//    public boolean checkSpawnRules(IWorld worldIn, SpawnReason spawnReason) {
-//        //return spawnReason == SpawnReason.SPAWNER || spawnReason == SpawnReason.NATURAL;        // out of control spawns !!
-//        return super.checkSpawnRules(worldIn, spawnReason);
-//    }
-
     @Override
     public float getWalkTargetValue(BlockPos p_205022_1_, IWorldReader p_205022_2_) {
         return 10.0f;        //p_205022_2_.getBlockState(p_205022_1_.below()).is(Blocks.GRASS_BLOCK) ? 10.0F : p_205022_2_.getBrightness(p_205022_1_) - 0.5F;
@@ -117,21 +124,6 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
     // I want control over EVERYTHING that gets dropped
     @Override
     public void aiStep() {
-// AnimalEntity
-//        if (this.getAge() != 0) {
-//            this.inLove = 0;
-//        }
-//
-//        if (this.inLove > 0) {
-//            --this.inLove;
-//            if (this.inLove % 10 == 0) {
-//                double d0 = this.random.nextGaussian() * 0.02D;
-//                double d1 = this.random.nextGaussian() * 0.02D;
-//                double d2 = this.random.nextGaussian() * 0.02D;
-//                this.level.addParticle(ParticleTypes.HEART, this.getRandomX(1.0D), this.getRandomY() + 0.5D, this.getRandomZ(1.0D), d0, d1, d2);
-//            }
-//        }
-
 // AgeableEntity.class
         if (this.level.isClientSide) {
             if (this.forcedAgeTimer > 0) {
@@ -275,8 +267,8 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         this.flap += this.flapping * 2.0F;
 
 
-        if (!this.level.isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey && --this.eggTime <= 0) {
-            if (this.chickenData.eggLayTime != 0) {
+        if (this.chickenData.eggLayTime != 0) {
+            if (!this.level.isClientSide && this.isAlive() && !this.isBaby() && !this.isChickenJockey && --this.eggTime <= 0) {
                 CrimsonChickens.calcDrops(this.entityData.get(GAIN), chickenData, 0).forEach(this::spawnAtLocation);
                 this.playSound(SoundEvents.CHICKEN_EGG, 1.0F, (this.random.nextFloat() - this.random.nextFloat()) * 0.2F + 1.0F);
 
@@ -348,9 +340,9 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         if (rce != null) {
             // if both chickens are the same... coal and coal, mr duck and mr duck
             if (chickenData.name.equals(rce.chickenData.name)) {
-                newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
+                if ((newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn)) != null)
+                    increaseStats(newChicken, this, rce, worldIn.random);
 
-                increaseStats(newChicken, this, rce, worldIn.random);
                 return newChicken;
             }
 
@@ -358,14 +350,10 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
             if (chickenData.hasTrait == 1 && rce.chickenData.hasTrait == 1) {
                 // chance of getting either a source duck, or a target duck, in case a mod extends my duck?
                 // or two or more registered ducks (Mr_Duck and Mrs_Duck eg)
-                if (worldIn.random.nextInt(2) == 0) {
+                if (worldIn.random.nextInt(2) == 0)
                     newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
-                    inheritStats(newChicken, this);
-
-                } else {
+                else
                     newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
-                    inheritStats(newChicken, rce);
-                }
 
                 return newChicken;
             }
@@ -374,28 +362,20 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
             if (chickenData.name.equals("chicken")) {
                 int r = worldIn.random.nextInt(100) + 1;
 
-                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get()) {
+                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
                     newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
-                    inheritStats(newChicken, rce);
-
-                } else {
+                else
                     newChicken = initEntities.getModChickens().get("chicken").get().create(worldIn);
-                    inheritStats(newChicken, this);
-                }
 
                 return newChicken;
 
             } else if (rce.chickenData.name.equals("chicken")) {
                 int r = worldIn.random.nextInt(100) + 1;
 
-                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get()) {
+                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
                     newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
-                    inheritStats(newChicken, this);
-
-                } else {
+                else
                     newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
-                    inheritStats(newChicken, rce);
-                }
 
                 return newChicken;
             }
@@ -429,16 +409,6 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
 
                 int r = this.level.random.nextInt(lst.size());
                 newChicken = initEntities.getModChickens().get(lst.get(r)).get().create(this.level);
-
-                switch (r) {
-                    case 0:
-                        inheritStats(newChicken, this);      // parentA
-                        break;
-                    case 1:
-                        inheritStats(newChicken, rce);              // parentB
-                        break;
-                }
-
                 return newChicken;
             }
 
@@ -485,16 +455,54 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
 
         super.die(damageSource);
 
+
+        if (this.chickenData.name.equals("grave")) {
+            // restore player inventory
+            // if player has item already in slot then drop item and restore original item
+            if (! (damageSource.getEntity() instanceof PlayerEntity)) return;
+            PlayerEntity playerIn = (PlayerEntity) damageSource.getEntity();
+            PlayerInventory playerInv = playerIn.inventory;
+
+            ListNBT lst = this.getPersistentData().getList("Inventory", 10);
+
+            for (int i = 0; i < lst.size(); ++ i) {
+                CompoundNBT compoundnbt = lst.getCompound(i);
+                int j = compoundnbt.getByte("Slot") & 255;
+                ItemStack itemstack = ItemStack.of(compoundnbt);
+
+                if (! itemstack.isEmpty()) {
+                    if (j < playerInv.items.size()) {
+                        if (! playerInv.items.get(j).isEmpty())
+                            playerIn.drop(playerInv.items.get(j), false);  // p_71019_2 is include ThrowerID()
+                        playerInv.items.set(j, itemstack);
+
+                    }
+                    else if (j >= 100 && j < playerInv.armor.size() + 100) {
+                        if (! playerInv.armor.get(j - 100).isEmpty())
+                            playerIn.drop(playerInv.armor.get(j - 100), false);  // p_71019_2 is include ThrowerID()
+                        playerInv.armor.set(j - 100, itemstack);
+
+                    }
+                    else if (j >= 150 && j < playerInv.offhand.size() + 150) {
+                        if (! playerInv.offhand.get(j - 150).isEmpty())
+                            playerIn.drop(playerInv.offhand.get(j - 150), false);  // p_71019_2 is include ThrowerID()
+                        playerInv.offhand.set(j - 150, itemstack);
+                    }
+                }
+            }
+        }
+
+
         if (chickenData.hasTrait == 3) {
             Explosion.Mode explosion$mode = net.minecraftforge.event.ForgeEventFactory.getMobGriefingEvent(this.level, this) ? Explosion.Mode.DESTROY : Explosion.Mode.NONE;
             this.level.explode(this, this.getX(), this.getY(), this.getZ(), 2, explosion$mode);
 
             if (! this.level.isClientSide)
-                damageSource.getEntity().hurt(new DamageSource("chicken.explode"), 10);
+                if (damageSource.getEntity() != null) damageSource.getEntity().hurt(new DamageSource("chicken.explode"), 10);
         }
         else if (chickenData.hasTrait == 4) {
             if (! this.level.isClientSide)
-                damageSource.getEntity().hurt(new DamageSource("chicken.thorns"), 1);
+                if (damageSource.getEntity() != null) damageSource.getEntity().hurt(new DamageSource("chicken.thorns"), 1);
         }
     }
 
@@ -518,7 +526,7 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
             }
             else if (chickenData.hasTrait == 4) {
                 if (! this.level.isClientSide)
-                    damageSource.getEntity().hurt(new DamageSource("chicken.thorns"), 1);
+                    if (damageSource.getEntity() != null) damageSource.getEntity().hurt(new DamageSource("chicken.thorns"), 1);
             }
         }
 
@@ -558,24 +566,6 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         }
     }
 
-    private void spawnLingeringCloud() {
-        Collection<EffectInstance> collection = this.getActiveEffects();
-        if (!collection.isEmpty()) {
-            AreaEffectCloudEntity areaeffectcloudentity = new AreaEffectCloudEntity(this.level, this.getX(), this.getY(), this.getZ());
-            areaeffectcloudentity.setRadius(2.5F);
-            areaeffectcloudentity.setRadiusOnUse(-0.5F);
-            areaeffectcloudentity.setWaitTime(10);
-            areaeffectcloudentity.setDuration(areaeffectcloudentity.getDuration() / 2);
-            areaeffectcloudentity.setRadiusPerTick(-areaeffectcloudentity.getRadius() / (float)areaeffectcloudentity.getDuration());
-
-            for(EffectInstance effectinstance : collection) {
-                areaeffectcloudentity.addEffect(new EffectInstance(effectinstance));
-            }
-
-            this.level.addFreshEntity(areaeffectcloudentity);
-        }
-    }
-
     @Override
     protected void dropFromLootTable(DamageSource damageSource, boolean applyLuckFromLastHurtByPlayer) {
         if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return;
@@ -587,59 +577,29 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
             resourcelocation = new ResourceLocation("minecraft", "entities/chicken");
 
         LootTable loottable = this.level.getServer().getLootTables().get(resourcelocation);
-        LootContext.Builder lootcontext$builder = this.createLootContext(applyLuckFromLastHurtByPlayer, damageSource);
-        LootContext ctx = lootcontext$builder.create(LootParameterSets.ENTITY);
+        if (loottable != LootTable.EMPTY) {
+            LootContext.Builder lootcontext$builder = this.createLootContext(applyLuckFromLastHurtByPlayer, damageSource);
+            LootContext ctx = lootcontext$builder.create(LootParameterSets.ENTITY);
 
-        loottable.getRandomItems(ctx).forEach(this::spawnAtLocation);
+            loottable.getRandomItems(ctx).forEach(this::spawnAtLocation);
+        }
     }
 
     @Override
     protected void dropCustomDeathLoot(DamageSource damageSource, int fortune, boolean p_213333_3_) {
         if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return; // TODO: <- redo this
 
-        //if (chickenData.dropItemItem.isEmpty()) return;
-
-        if (chickenData.name.equals("grave")) {
-            // restore player inventory
-            // if player has item already in slot then drop item and restore original item
-            if (! (damageSource.getEntity() instanceof PlayerEntity)) return;
-            PlayerEntity playerIn = (PlayerEntity) damageSource.getEntity();
-            PlayerInventory playerInv = playerIn.inventory;
-
-            ListNBT lst = this.getPersistentData().getList("Inventory", 10);
-
-            for(int i = 0; i < lst.size(); ++i) {
-                CompoundNBT compoundnbt = lst.getCompound(i);
-                int j = compoundnbt.getByte("Slot") & 255;
-                ItemStack itemstack = ItemStack.of(compoundnbt);
-
-                if (! itemstack.isEmpty()) {
-                    if (j < playerInv.items.size()) {
-                        if (! playerInv.items.get(j).isEmpty()) playerIn.drop(playerInv.items.get(j), false);  // p_71019_2 is include ThrowerID()
-                        playerInv.items.set(j, itemstack);
-
-                    } else if (j >= 100 && j < playerInv.armor.size() + 100) {
-                        if (! playerInv.armor.get(j - 100).isEmpty()) playerIn.drop(playerInv.armor.get(j - 100), false);  // p_71019_2 is include ThrowerID()
-                        playerInv.armor.set(j - 100, itemstack);
-
-                    } else if (j >= 150 && j < playerInv.offhand.size() + 150) {
-                        if (! playerInv.offhand.get(j - 150).isEmpty()) playerIn.drop(playerInv.offhand.get(j - 150), false);  // p_71019_2 is include ThrowerID()
-                        playerInv.offhand.set(j - 150, itemstack);
-                    }
-                }
-            }
-
-        } else {
-
-            int r = new Random().nextInt(100) + 1;
-            if (r <= CrimsonChickens.CONFIGURATION.allowDeathDropResource.get())
-                CrimsonChickens.calcDrops(this.entityData.get(GAIN), chickenData, fortune).forEach(this::spawnAtLocation);
-        }
+        int r = new Random().nextInt(100) + 1;
+        if (r <= CrimsonChickens.CONFIGURATION.allowDeathDropResource.get())
+            CrimsonChickens.calcDrops(this.entityData.get(GAIN), chickenData, fortune).forEach(this::spawnAtLocation);
     }
 
     @Override
     protected SoundEvent getAmbientSound() {
-        return chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT.get() : SoundEvents.CHICKEN_AMBIENT;
+        if (chickenData.hasTrait == 1) return initSounds.DUCK_AMBIENT.get();
+        if (chickenData.hasTrait == 9) return initSounds.RADIATION.get();
+
+        return SoundEvents.CHICKEN_AMBIENT;
     }
 
     @Override
@@ -663,35 +623,33 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
 
     @Override
     public void addProbeEntityInfo(ProbeMode mode, IProbeInfo probeInfo, PlayerEntity player, World world, Entity entity, IProbeHitEntityData data) {
-        ResourceChickenEntity chicken = (ResourceChickenEntity) entity;
-        if (chicken.entityData.get(ANALYZED)) {
-            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.growth", chicken.entityData.get(GROWTH)));
-            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.gain", chicken.entityData.get(GAIN)));
-            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.strength", chicken.entityData.get(STRENGTH)));
+        if (this.entityData.get(ANALYZED)) {
+            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.growth", this.entityData.get(GROWTH)));
+            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.gain", this.entityData.get(GAIN)));
+            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.strength", this.entityData.get(STRENGTH)));
         }
 
-        if (! chicken.isBaby()) {
-            if (chickenData.eggLayTime != 0) {
-                int secs = chicken.eggTime / 20;
+        if (! this.isBaby()) {
+            if (this.chickenData.eggLayTime != 0) {
+                int secs = this.eggTime / 20;
                 probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
             }
         }
-    }
 
-    public void addWailaEntityInfo(List<ITextComponent> tooltip, IEntityAccessor accessor) {
-        ResourceChickenEntity chicken = (ResourceChickenEntity) accessor.getEntity();
-        if (chicken.entityData.get(ANALYZED)) {
-            tooltip.add(new TranslationTextComponent("tip.crimsonchickens.growth", chicken.entityData.get(GROWTH)));
-            tooltip.add(new TranslationTextComponent("tip.crimsonchickens.gain", chicken.entityData.get(GAIN)));
-            tooltip.add(new TranslationTextComponent("tip.crimsonchickens.strength", chicken.entityData.get(STRENGTH)));
-        }
+//        CompoundNBT parentNBT = this.getPersistentData();       //TODO: Remove this for Fields, not NBT
+//        CompoundNBT NBT = parentNBT.getCompound("Mutation");
 
-//        if (! chicken.isBaby()) {
-//            if (chickenData.eggLayTime != 0) {
-//                int secs = chicken.eggTime / 20;
-//                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
+        //TODO: Remove this for Fields, not Registries
+//        if (! NBT.isEmpty()) {
+        if (this.conversionCount != 0) {
+//            Item itm = ForgeRegistries.ITEMS.getValue(new ResourceLocation(NBT.getString("type")));
+//            if (itm != Items.AIR) {
+//                probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.conv", new TranslationTextComponent(itm.getDescriptionId())));
+                probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.conv", new TranslationTextComponent(this.conversionDescID)));
+//                probeInfo.progress(NBT.getInt("count"), NBT.getInt("req"));
+                probeInfo.progress(this.conversionCount, this.conversionRequired);
 //            }
-//        }
+        }
     }
 
     @Override
@@ -708,10 +666,21 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
     public void readAdditionalSaveData(CompoundNBT compoundNBT) {
         super.readAdditionalSaveData(compoundNBT);
 
-        this.entityData.set(ANALYZED, compoundNBT.getBoolean("analyzed"));
-        this.entityData.set(GROWTH, compoundNBT.getInt("growth"));
-        this.entityData.set(GAIN, compoundNBT.getInt("gain"));
-        this.entityData.set(STRENGTH, compoundNBT.getInt("strength"));
+        // this stops missing nbt causing stats to be 0
+        if (compoundNBT.contains("analyzed")) {
+			this.entityData.set(ANALYZED, compoundNBT.getBoolean("analyzed"));
+			this.entityData.set(GROWTH, compoundNBT.getInt("growth"));
+			this.entityData.set(GAIN, compoundNBT.getInt("gain"));
+			this.entityData.set(STRENGTH, compoundNBT.getInt("strength"));
+		}
+
+        if (compoundNBT.contains("Mutation")) {
+            CompoundNBT nbt = compoundNBT.getCompound("Mutation");
+            this.conversionCount = nbt.getInt("count");
+            this.conversionRequired = nbt.getInt("req");
+            this.conversionType = nbt.getString("type");
+            this.conversionDescID = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.conversionType)).getDescriptionId();
+        }
 
         this.eggTime = CrimsonChickens.calcNewEggLayTime(this.random, this.chickenData, this.entityData.get(GROWTH));
     }
@@ -724,6 +693,14 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         compoundNBT.putInt("growth", this.entityData.get(GROWTH));
         compoundNBT.putInt("gain", this.entityData.get(GAIN));
         compoundNBT.putInt("strength", this.entityData.get(STRENGTH));
+
+        if (this.conversionCount != 0) {
+            CompoundNBT nbt = new CompoundNBT();
+            nbt.putInt("count", this.conversionCount);
+            nbt.putInt("req", this.conversionRequired);
+            nbt.putString("type", this.conversionType);
+            compoundNBT.put("Mutation", nbt);
+        }
     }
 
     private static void increaseStats(ResourceChickenEntity newChicken, ResourceChickenEntity parent1, ResourceChickenEntity parent2, Random rand) {
@@ -773,6 +750,108 @@ public class ResourceChickenEntity extends ChickenEntity implements ITOPInfoEnti
         if (! this.level.isClientSide) {
             if (this.chickenData.hasTrait == 4) entity.hurt(DamageSource.thorns(entity), 1 + (this.entityData.get(STRENGTH) / 2f));
             if (this.chickenData.hasTrait == 5) entity.setSecondsOnFire(1 + (this.entityData.get(STRENGTH) / 2));
+            if (this.chickenData.hasTrait == 9) {
+                ((LivingEntity)entity).addEffect(new EffectInstance(Effects.POISON, 4 * 20));
+            }
         }
+    }
+
+    @Override       // shearing and converting
+    public ActionResultType mobInteract(PlayerEntity playerIn, Hand handIn) {
+        // fired once per hand !, so twice !!
+        if ((! playerIn.level.isClientSide) && playerIn.getUsedItemHand() == handIn) {
+            ItemStack itemStack = playerIn.getMainHandItem();
+
+            if (! itemStack.isEmpty()) {
+                if (FOOD_ITEMS.test(itemStack))
+                    return super.mobInteract(playerIn, handIn);     // mainly controls food
+
+                if (itemStack.getItem() instanceof ShearsItem) {
+                    if (CrimsonChickens.CONFIGURATION.allowShearingChickens.get()) {
+                        itemStack.hurtAndBreak(1, playerIn, playr -> playerIn.broadcastBreakEvent(handIn));
+
+                        World world = playerIn.level;
+                        BlockPos pos = playerIn.blockPosition();
+
+                        this.hurt(new DamageSource("death.attack.shears"), 1);
+                        ((ServerWorld) world).sendParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + this.getEyeHeight(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
+
+                        world.playSound(null, pos, SoundEvents.SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
+
+                        world.addFreshEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(),
+                            this.chickenData.hasTrait == 1
+                            ? new ItemStack(initItems.FEATHER_DUCK.get())
+                            : new ItemStack(Items.FEATHER)));
+
+                        return ActionResultType.SUCCESS;
+                    }
+
+                    return ActionResultType.FAIL;
+                }
+
+                // Conversion only works on 'Vanilla' chickens
+                if (! CrimsonChickens.CONFIGURATION.allowConvertingVanilla.get()) return ActionResultType.FAIL;
+                if (! this.chickenData.name.equals("chicken")) return ActionResultType.FAIL;
+
+                // loop thru registry and find dropItem that matches item player is holding (itemStack)
+                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+                    String name = entry.getKey();
+                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
+
+//                    playerIn.displayClientMessage(new StringTextComponent(chickenData.dropItemItem).append(" : ").append(itemStack.getItem().getRegistryName().toString()), false);
+
+                    if (chickenData.dropItemItem.equals(itemStack.getItem().getRegistryName().toString())) {
+                        if (! playerIn.abilities.instabuild) itemStack.shrink(1);
+
+                        if (this.conversionCount % 4 == 0) {
+                            ((ServerWorld) playerIn.level).sendParticles(ParticleTypes.HAPPY_VILLAGER,
+                                this.position().x, this.position().y + 0.5, this.position().z,
+                                100, 1, 1, 1, 0);
+                        }
+
+                        // if converting a partly already converted chicken then reset/remove type/count
+                        if (! chickenData.dropItemItem.equals(this.conversionType)) {
+                            this.getPersistentData().remove("Mutation");
+
+                            this.conversionCount = 1;
+                            this.conversionRequired = chickenData.conversion;
+                            this.conversionType = chickenData.dropItemItem;
+                            this.conversionDescID = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.conversionType)).getDescriptionId();
+
+                        } else {
+                            this.conversionCount++;
+                        }
+
+                        if (this.conversionCount >= chickenData.conversion) {
+                            this.remove();
+
+                            playerIn.level.playSound(null, this.blockPosition(), SoundEvents.GENERIC_EXPLODE, SoundCategory.AMBIENT, 1f, 1f);
+                            ((ServerWorld) playerIn.level).sendParticles(ParticleTypes.POOF,
+                                this.position().x, this.position().y + 0.5, this.position().z,
+                                200, 1, 1, 1, 0);
+
+                            ResourceChickenEntity newChick = initEntities.getModChickens().get(chickenData.name).get().create(playerIn.level);
+                            newChick.copyPosition(this);
+
+                            if (this.hasCustomName()) {
+                                newChick.setCustomName(this.getCustomName());
+                                newChick.setCustomNameVisible(this.isCustomNameVisible());
+                            }
+
+                            newChick.setInvulnerable(this.isInvulnerable());
+
+//                        newChick.setYHeadRot(targetChicken.getYHeadRot());
+                            playerIn.level.addFreshEntity(newChick);
+                        }
+
+                        return ActionResultType.SUCCESS;
+                    }
+                }
+
+                return ActionResultType.FAIL;
+            }
+        }
+
+        return super.mobInteract(playerIn, handIn);     // mainly controls food
     }
 }

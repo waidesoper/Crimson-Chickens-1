@@ -9,60 +9,124 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.item.EggItem;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.ActionResult;
-import net.minecraft.util.Direction;
-import net.minecraft.util.Hand;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.particles.ParticleTypes;
+import net.minecraft.stats.Stats;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
+import net.minecraftforge.common.capabilities.ICapabilityProvider;
+import net.minecraftforge.fluids.FluidStack;
+import net.minecraftforge.fluids.capability.IFluidHandler;
+import net.minecraftforge.fluids.capability.templates.FluidHandlerItemStack;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 public class LiquidEgg extends EggItem {
-    private final Fluid content;
+    private final Fluid fluidType;      // Lava, Water etc
+
+    @Nullable
+    @Override
+    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
+        FluidHandlerItemStack fluidHandlerItemStack = new FluidHandlerItemStack(stack, 1000) {
+            @Nonnull
+            @Override
+            public ItemStack getContainer() { return ItemStack.EMPTY; }
+
+            @Nonnull
+            @Override
+            public FluidStack getFluid() { return new FluidStack(fluidType,1000); }
+
+            @Override
+            public int getTanks() { return 1; }
+
+            @Override
+            public boolean isFluidValid(int tank, @Nonnull FluidStack stack) { return false; }
+
+            @Override
+            public boolean canFillFluidType(FluidStack fluid) { return false; }
+
+            @Nonnull
+            @Override
+            public FluidStack drain(int maxDrain, FluidAction action) {
+                if (maxDrain < 1000) return FluidStack.EMPTY;
+                return super.drain(maxDrain, action);
+            }
+        };
+
+        fluidHandlerItemStack.fill(new FluidStack(fluidType, 1000), IFluidHandler.FluidAction.EXECUTE);
+        return fluidHandlerItemStack;
+    }
 
     public LiquidEgg(Fluid p_i49025_1_) {
-        super(new Properties().tab(CrimsonChickens.TAB).stacksTo(64));
-        this.content = p_i49025_1_;
+        super(new Properties().tab(CrimsonChickens.TAB).stacksTo(16));
+        this.fluidType = p_i49025_1_;
     }
 
     @Override
     public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-//        return super.use(p_77659_1_, p_77659_2_, p_77659_3_);
+        ItemStack itemStack = playerIn.getItemInHand(handIn);
+        BlockRayTraceResult rayTraceResult = getPlayerPOVHitResult(worldIn, playerIn, RayTraceContext.FluidMode.NONE);
 
-        ItemStack itemstack = playerIn.getItemInHand(handIn);
-        BlockRayTraceResult raytraceresult = getPlayerPOVHitResult(worldIn, playerIn, RayTraceContext.FluidMode.NONE);
-
-        ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(playerIn, worldIn, itemstack, raytraceresult);
+        ActionResult<ItemStack> ret = net.minecraftforge.event.ForgeEventFactory.onBucketUse(playerIn, worldIn, itemStack, rayTraceResult);
         if (ret != null) return ret;
 
-        if (raytraceresult.getType() == RayTraceResult.Type.MISS) {
-            return ActionResult.pass(itemstack);
+        if (rayTraceResult.getType() == RayTraceResult.Type.MISS) {
+            return ActionResult.pass(itemStack);
 
-        } else if (raytraceresult.getType() != RayTraceResult.Type.BLOCK) {
-            return ActionResult.pass(itemstack);
+        } else if (rayTraceResult.getType() != RayTraceResult.Type.BLOCK) {
+            return ActionResult.pass(itemStack);
 
         } else {
-            BlockPos blockpos = raytraceresult.getBlockPos();
-            Direction direction = raytraceresult.getDirection();
-            BlockPos blockpos1 = blockpos.relative(direction);
+            BlockPos blockPos = rayTraceResult.getBlockPos();
+            Direction direction = rayTraceResult.getDirection();
+            BlockPos blockPos1 = blockPos.relative(direction);
 
-            BlockState blockstate = worldIn.getBlockState(blockpos);
-            BlockPos blockpos2 = canBlockContainFluid(worldIn, blockpos, blockstate) ? blockpos : blockpos1;
-            if (worldIn.setBlockAndUpdate(blockpos2, content.defaultFluidState().createLegacyBlock())) {
-//                this.checkExtraContent(p_77659_1_, itemstack, blockpos2);
+            BlockState blockState = worldIn.getBlockState(blockPos);
+            BlockPos blockPos2 = canBlockContainFluid(worldIn, blockPos, blockState) ? blockPos : blockPos1;
+
+            if (worldIn.dimensionType().ultraWarm() && this.fluidType.is(FluidTags.WATER)) {
+                worldIn.playSound(playerIn, blockPos2, SoundEvents.FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.random.nextFloat() - worldIn.random.nextFloat()) * 0.8F);
+
+                for (int a = 0; a < 8; ++a) {
+                    worldIn.addParticle(ParticleTypes.LARGE_SMOKE,
+            (double) blockPos2.getX() + Math.random(), (double) blockPos2.getY() + Math.random(), (double) blockPos2.getZ() + Math.random(), 0.0D, 0.0D, 0.0D);
+                }
+
+                if (! playerIn.abilities.instabuild) itemStack.shrink(1);
+
+                playerIn.awardStat(Stats.ITEM_USED.get(this));
+                return ActionResult.sidedSuccess(itemStack, worldIn.isClientSide());
+
+            } else if (worldIn.setBlockAndUpdate(blockPos2, fluidType.defaultFluidState().createLegacyBlock())) {
                 if (playerIn instanceof ServerPlayerEntity)
-                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity)playerIn, blockpos2, itemstack);
+                    CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) playerIn, blockPos2, itemStack);
 
-//                p_77659_2_.awardStat(Stats.ITEM_USED.get(this));
-                return ActionResult.sidedSuccess(itemstack, worldIn.isClientSide());
-            } else {
-                return ActionResult.fail(itemstack);
+                playEmptySound(playerIn, worldIn, blockPos2);
+                if (! playerIn.abilities.instabuild) itemStack.shrink(1);
+
+                playerIn.awardStat(Stats.ITEM_USED.get(this));
+                return ActionResult.sidedSuccess(itemStack, worldIn.isClientSide());
             }
         }
+
+        return ActionResult.fail(itemStack);
     }
 
     private boolean canBlockContainFluid(World worldIn, BlockPos posIn, BlockState blockstate) {
-        return blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer)blockstate.getBlock()).canPlaceLiquid(worldIn, posIn, blockstate, this.content);
+        return blockstate.getBlock() instanceof ILiquidContainer && ((ILiquidContainer) blockstate.getBlock()).canPlaceLiquid(worldIn, posIn, blockstate, this.fluidType);
+    }
+
+    protected void playEmptySound(@Nullable PlayerEntity p_203791_1_, IWorld p_203791_2_, BlockPos p_203791_3_) {
+        SoundEvent emptySound = this.fluidType.getAttributes().getEmptySound();
+
+        if(emptySound == null) emptySound = this.fluidType.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
+        p_203791_2_.playSound(p_203791_1_, p_203791_3_, emptySound, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 }

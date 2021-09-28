@@ -5,7 +5,9 @@ import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.initBlocks;
 import crimsonfluff.crimsonchickens.init.initItems;
+import crimsonfluff.crimsonchickens.init.initSounds;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
+import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityClassification;
@@ -20,7 +22,6 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.*;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -28,7 +29,6 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import javax.annotation.Resource;
 import java.util.List;
 
 public class AnimalNet extends Item {
@@ -53,14 +53,15 @@ public class AnimalNet extends Item {
 //        } else
 //            newStack = itemStack;
 
+        // config.SpawnType=1 would mean Resource Chicken would be MONSTER classification
         ResourceChickenData chickenData = null;
         if (entityIn instanceof ResourceChickenEntity) {
             chickenData = ((ResourceChickenEntity) entityIn).chickenData;
             if (chickenData.name.equals("grave")) return ActionResultType.FAIL;     // can't pick up grave chicken
 
         } else {
-            // config.SpawnType=1 would mean Resource Chicken would be MONSTER classification
             if (entityIn.getClassification(false) == EntityClassification.MONSTER) return ActionResultType.FAIL;
+            if (entityIn instanceof PlayerEntity) return ActionResultType.FAIL;
         }
 
         // checks for ClientSide and isDamageable and Creative
@@ -127,11 +128,16 @@ public class AnimalNet extends Item {
 
                 te.entitySet(compound, context.getItemInHand().getOrCreateTag().getString("entityDescription"), true);
 
+                ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(compound.getString("id"));
+                context.getLevel().playSound(null, context.getPlayer().blockPosition(),
+                    context.getLevel().random.nextInt(2) == 0
+                        ? SoundEvents.CHICKEN_EGG
+                        : chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT.get() : SoundEvents.CHICKEN_AMBIENT
+                , SoundCategory.PLAYERS, 1f, 1f);
+
                 context.getItemInHand().removeTagKey("entityCaptured");
                 context.getItemInHand().removeTagKey("entityDescription");
                 context.getItemInHand().removeTagKey("CustomModelData");        // used to change item texture
-
-                context.getLevel().playSound(null, context.getPlayer().blockPosition(), SoundEvents.CHICKEN_EGG, SoundCategory.PLAYERS, 1f, 1f);
 
             } else
                 return ActionResultType.CONSUME;       // stops the arm swing animation ?

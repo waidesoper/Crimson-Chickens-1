@@ -21,6 +21,7 @@ public class initConfigBuilder {
     public ForgeConfigSpec.BooleanValue analyseChickens;
 
     public ForgeConfigSpec.BooleanValue renderLabels;
+    public ForgeConfigSpec.BooleanValue renderItems;
 
 
     public initConfigBuilder() {
@@ -89,6 +90,10 @@ public class initConfigBuilder {
         renderLabels = builder
             .comment("Render Nest labels for named chickens.  Default: true")
             .define("renderLabels", true);
+
+        renderItems = builder
+            .comment("Render item drops in the Nest.  Default: false")
+            .define("renderItems", false);
 
         builder.pop();
 

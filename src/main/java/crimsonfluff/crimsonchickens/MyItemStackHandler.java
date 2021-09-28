@@ -1,6 +1,8 @@
 package crimsonfluff.crimsonchickens;
 
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.util.NonNullList;
 import net.minecraftforge.items.ItemStackHandler;
 
@@ -68,4 +70,22 @@ public class MyItemStackHandler extends ItemStackHandler {
     }
 
     public List<ItemStack> contents() { return stacks; }
+
+    @Override
+    public boolean isItemValid(int slot, @Nonnull ItemStack stack) {
+        if (slot == 0) {
+            Item item = stack.getItem();
+            return item == Items.WHEAT_SEEDS || item == Items.BEETROOT_SEEDS || item == Items.MELON_SEEDS || item == Items.PUMPKIN_SEEDS;
+        }
+
+        return false;
+    }
+
+    @Nonnull
+    @Override
+    public ItemStack extractItem(int slot, int amount, boolean simulate) {
+        if (slot == 0) return ItemStack.EMPTY;
+
+        return super.extractItem(slot, amount, simulate);
+    }
 }

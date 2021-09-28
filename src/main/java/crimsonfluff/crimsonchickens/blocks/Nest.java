@@ -2,7 +2,6 @@ package crimsonfluff.crimsonchickens.blocks;
 
 import crimsonfluff.crimsonchickens.compat.ITOPInfoProvider;
 import mcjty.theoneprobe.api.*;
-import mcp.mobius.waila.api.IDataAccessor;
 import net.minecraft.block.*;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -13,7 +12,6 @@ import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.state.StateContainer;
@@ -26,7 +24,6 @@ import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockReader;
@@ -37,7 +34,6 @@ import net.minecraftforge.items.ItemHandlerHelper;
 import net.minecraftforge.registries.ForgeRegistries;
 
 import javax.annotation.Nullable;
-import java.util.List;
 import java.util.stream.Stream;
 
 public class Nest extends ContainerBlock implements ITOPInfoProvider {
@@ -129,8 +125,8 @@ public class Nest extends ContainerBlock implements ITOPInfoProvider {
         if (te.entityCaptured != null) {
             iProbeInfo.text(new StringTextComponent(te.entityDescription));
 
-            if (te.entityCaptured.contains("CustomName", 8))
-                iProbeInfo.text(ITextComponent.Serializer.fromJson(te.entityCaptured.getString("CustomName")));
+            if (te.entityCustomName != null)
+                iProbeInfo.text(te.entityCustomName);
 
             if (te.entityCaptured.getBoolean("analyzed")) {
                 iProbeInfo.text(new TranslationTextComponent("tip.crimsonchickens.growth", te.chickenGrowth));
@@ -141,78 +137,36 @@ public class Nest extends ContainerBlock implements ITOPInfoProvider {
             int secs;
             if (te.chickenAge < 0) {
                 secs = -te.chickenAge / 20;
-                iProbeInfo.text(new StringTextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                iProbeInfo.text(new TranslationTextComponent("tip.crimsonchickens.growing", String.format("%02d:%02d", secs / 60, secs % 60)));
 
             } else {
                 if (te.storedItems.getStackInSlot(0).isEmpty()) {
-                    iProbeInfo.text(CompoundText.create().style(TextStyleClass.WARNING).text("Requires seeds"));
+                    iProbeInfo.text(CompoundText.create().style(TextStyleClass.WARNING).text(new TranslationTextComponent("tip.crimsonchickens.seeds")));
 
                 } else {
                     if (te.entityCaptured.getInt("EggLayTime") != 0) {
                         secs = te.eggLayTime / 20;
-                        iProbeInfo.text(new StringTextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
+                        iProbeInfo.text(new TranslationTextComponent("tip.crimsonchickens.egg", String.format("%02d:%02d", secs / 60, secs % 60)));
                     }
                 }
             }
         }
-//        else {
-//            iProbeInfo.text(new StringTextComponent("Empty"));
-//        }
-        //iProbeInfo.text(new StringTextComponent(te.getTileData().toString()));
-    }
-
-    public void addWailaEntityInfo(List<ITextComponent> tooltip, IDataAccessor accessor) {
-        NestTileEntity te = (NestTileEntity) accessor.getWorld().getBlockEntity(accessor.getPosition()); //.getBlockEntity(iProbeHitData.getPos());
-        if (te == null) return;
-
-        if (te.getTileData().contains("entityCaptured")) {
-            tooltip.add(new StringTextComponent(te.getTileData().getString("entityDescription")));
-
-            if (te.getTileData().contains("CustomName", 8))
-                tooltip.add(ITextComponent.Serializer.fromJson(te.getTileData().getString("CustomName")));
-
-            CompoundNBT compound = te.getTileData().getCompound("entityCaptured");
-            if (compound.getBoolean("analyzed")) {
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.growth", compound.getInt("growth")));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.gain", compound.getInt("gain")));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.strength", compound.getInt("strength")));
-            }
-
-            int secs;
-            if (te.chickenAge < 0) {
-                secs = -te.chickenAge / 20;
-                tooltip.add(new StringTextComponent("Growing Time: " + String.format("%02d:%02d", secs / 60, secs % 60)));
-
-            } else {
-                if (te.storedItems.getStackInSlot(0).isEmpty()) {
-                    tooltip.add(new StringTextComponent("Requires seeds"));
-
-                } else {
-                    secs = te.eggLayTime / 20;
-                    tooltip.add(new StringTextComponent("Next Drop: " + String.format("%02d:%02d", secs / 60, secs % 60)));
-                }
-            }
-
-        } else {
-            tooltip.add(new StringTextComponent("Empty"));
-        }
-        //iProbeInfo.text(new StringTextComponent(te.getTileData().toString()));
     }
 
     @Override
     public ActionResultType use(BlockState state, World world, BlockPos pos, PlayerEntity player, Hand hand, BlockRayTraceResult p_225533_6_) {
-        if (world.isClientSide) return ActionResultType.SUCCESS;
+        if (world.isClientSide) return ActionResultType.CONSUME;
 
         NestTileEntity te = (NestTileEntity) world.getBlockEntity(pos);
-        if (te == null) return ActionResultType.FAIL;
+        if (te == null) return ActionResultType.CONSUME;
 
-        Item item = player.getItemInHand(hand).getItem();
+        ItemStack itemStack = player.getItemInHand(hand);
+        if (itemStack.isEmpty()) return ActionResultType.CONSUME;
+        Item item = itemStack.getItem();
 
         // try and insert item into the Nest, it only accepts seeds, so if returns .isEmpty()
         // then it must have been a seed, and must have been inserted
         if (ItemHandlerHelper.insertItem(te.storedItems, new ItemStack(item, 1), false).isEmpty()) {
-//                CrimsonChickens.LOGGER.info("ADDED SEEDS");
-
             for (int a = 0; a < 4; a++) {
                 double d0 = this.RANDOM.nextGaussian() * 0.2D;
                 double d1 = this.RANDOM.nextGaussian() * 0.2D;
@@ -221,17 +175,17 @@ public class Nest extends ContainerBlock implements ITOPInfoProvider {
                 ((ServerWorld) world).sendParticles(ParticleTypes.HEART, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, d0, d1, d2,0);
             }
 
-            if (! player.abilities.instabuild) player.getItemInHand(hand).shrink(1);
+            if (! player.abilities.instabuild) itemStack.shrink(1);
             return ActionResultType.SUCCESS;
         }
 
         // inc. modded name tags?
         // blank name tags will remove name
         if (item instanceof NameTagItem) {
-            te.entitySetCustomName(player.getItemInHand(hand).getTagElement("display"));
+            te.entitySetCustomName(itemStack.getTagElement("display"));
             te.sendUpdates();
 
-            if (! player.abilities.instabuild) player.getItemInHand(hand).shrink(1);
+            if (! player.abilities.instabuild) itemStack.shrink(1);
             return ActionResultType.SUCCESS;
         }
 
@@ -250,9 +204,11 @@ public class Nest extends ContainerBlock implements ITOPInfoProvider {
             NestTileEntity te = (NestTileEntity) world.getBlockEntity(pos);
 
             if (te != null) {
-                te.storedItems.contents().forEach(item -> {
-                    InventoryHelper.dropItemStack(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, item);
-                });
+                if (! te.storedItems.contents().isEmpty()) {
+                    te.storedItems.contents().forEach(item -> {
+                        InventoryHelper.dropItemStack(world, pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5, item);
+                    });
+                }
 
                 if (te.entityCaptured != null) {
                     Entity entity = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(te.entityCaptured.getString("id"))).create(world);

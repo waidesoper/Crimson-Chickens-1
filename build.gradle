@@ -12,7 +12,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'maven-publish'
 apply plugin: 'idea'
 
-version = "${crimsonchickens_version}"
+version = "${minecraft_version}-${crimsonchickens_version}"
 group = 'CrimsonFluff.crimsonchickens' // http://maven.apache.org/guides/mini/guide-naming-conventions.html
 archivesBaseName = 'crimsonchickens'
 
@@ -101,12 +101,12 @@ dependencies {
 jar {
     manifest {
         attributes([
-            "Specification-Title": "CrimsonChickens",
-            "Specification-Vendor": "CrimsonFluff",
+            "Specification-Title": "Crimson Chickens",
+            "Specification-Vendor": "Crimson_Fluff",
             "Specification-Version": "${project.crimsonchickens_version}", // We are version 1 of ourselves
-            "Implementation-Title": "CrimsonChickens",
+            "Implementation-Title": "Crimson Chickens",
             "Implementation-Version": "${project.crimsonchickens_version}",
-            "Implementation-Vendor" :"CrimsonFluff",
+            "Implementation-Vendor" :"Crimson_Fluff",
             "Implementation-Timestamp": new Date().format("yyyy-MM-dd'T'HH:mm:ssZ")
         ])
     }

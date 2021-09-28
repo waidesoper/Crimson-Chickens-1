@@ -1,6 +1,6 @@
 {
 	"displayName": "Creeper Chicken",
-	"dropItem": "minecraft:gun_powder",
+	"dropItem": "minecraft:gunpowder",
 	"dropItemNBT": "",
 	"spawnNaturally": false,
 	"spawnType": 0,

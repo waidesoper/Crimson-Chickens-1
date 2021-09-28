@@ -9,7 +9,7 @@
 	"baseHealth": 4,
 	"baseSpeed": 0.25,
 	"isFireImmune": false,
-	"conversion": 25,
+	"conversion": 250,
 	"biomesWhitelist": [],
 	"biomesBlacklist": [],
 	"eggLayTime": 6000,

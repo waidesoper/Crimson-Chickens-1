@@ -1,10 +1,11 @@
 package crimsonfluff.crimsonchickens.entity;
 
-import net.minecraft.client.renderer.entity.model.ChickenModel;
+import com.google.common.collect.ImmutableList;
+import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 
-public class NestChickenModel<T extends LivingEntity> extends ChickenModel<T> {
+public class NestChickenModel<T extends Entity> extends AgeableModel<T> {
     public final ModelRenderer head;
     public final ModelRenderer body;
     public final ModelRenderer wing0;
@@ -31,5 +32,19 @@ public class NestChickenModel<T extends LivingEntity> extends ChickenModel<T> {
         this.wing1 = new ModelRenderer(this, 24, 13);
         this.wing1.addBox(-1.0F, 0.0F, -3.0F, 1.0F, 4.0F, 6.0F);
         this.wing1.setPos(4.0F, 13.0F, 0.0F);
+    }
+
+    @Override
+    public void setupAnim(T p_225597_1_, float p_225597_2_, float p_225597_3_, float p_225597_4_, float p_225597_5_, float p_225597_6_) {
+    }
+
+    @Override
+    protected Iterable<ModelRenderer> headParts() {
+        return ImmutableList.of(this.head, this.beak, this.comb);
+    }
+
+    @Override
+    protected Iterable<ModelRenderer> bodyParts() {
+        return ImmutableList.of(this.body, this.wing0, this.wing1);
     }
 }

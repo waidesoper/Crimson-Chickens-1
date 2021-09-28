@@ -48,12 +48,12 @@ public class Serializers {
             mt.eggSecondaryColor = obj.get("eggColorBackground").getAsInt();
             mt.hasTrait = obj.get("hasTrait").getAsInt();
 
-            JsonElement element;
-            element = obj.get("biomesWhitelist");
-            if (element != null) mt.biomesWhitelist = element.getAsJsonArray();
+            JsonArray element;
+            element = obj.getAsJsonArray("biomesWhitelist");
+            if (element != null && element.size() != 0) mt.biomesWhitelist = element;   //.getAsJsonArray();
 
-            element = obj.get("biomesBlacklist");
-            if (element != null) mt.biomesBlacklist = element.getAsJsonArray();
+            element = obj.getAsJsonArray("biomesBlacklist");
+            if (element != null && element.size() != 0) mt.biomesBlacklist = element;   //.getAsJsonArray();
 
             mt.spawnNaturally = obj.get("spawnNaturally").getAsBoolean();
             mt.spawnType = obj.get("spawnType").getAsInt();
@@ -83,10 +83,10 @@ public class Serializers {
             obj.addProperty("eggColorBackground", src.eggSecondaryColor);
             obj.addProperty("hasTrait", src.hasTrait);
 
-            if (src.biomesWhitelist != null && src.biomesWhitelist.size() != 0)
+            if (src.biomesWhitelist != null)
                 obj.add("biomesWhitelist", src.biomesWhitelist);
 
-            if (src.biomesBlacklist != null && src.biomesBlacklist.size() != 0)
+            if (src.biomesBlacklist != null)
                 obj.add("biomesBlacklist", src.biomesBlacklist);
 
             obj.addProperty("spawnNaturally", src.spawnNaturally);

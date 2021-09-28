@@ -28,13 +28,13 @@ public class ResourceChickenData {
     public CompoundNBT dropItemNBT = null;      // cache the actual NBT
 //    public Item dropItemItem = null;            // cache the actual item
     public String dropItemItem = "";            // cant cache because FMLCommonSetUp is too late to register chickens
-                                                //and modded items may not exist yet
+                                                // and modded items may not exist yet
 
     public JsonArray biomesWhitelist = null;
     public JsonArray biomesBlacklist = null;
     public boolean spawnNaturally = false;
 
-    // spawning in the Nether has better chance if its of type Monster? WIP
+    // spawning in the Nether has better chance if its of type Monster !
     public int spawnType = 0;                        // 0=CREATURE, 1=MONSTER
     public int spawnWeight = 15;
 

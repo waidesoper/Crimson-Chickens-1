@@ -10,7 +10,6 @@ import crimsonfluff.crimsonchickens.init.initTiles;
 import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import crimsonfluff.crimsonchickens.registry.IResourceChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
@@ -37,7 +36,6 @@ import java.util.Map;
 // so moved ClientStuffs into here
 
 public class ClientEventHandlers {
-    private static final IResourceChickenRegistry CHICKEN_REGISTRY = ChickenRegistry.getRegistry();
     private static final Multimap<ResourceLocation, ResourceLocation> MODEL_MAP = LinkedHashMultimap.create();
 
     private ClientEventHandlers() { throw new IllegalStateException("ClientEventHandlers Utility Class"); }
@@ -87,8 +85,9 @@ public class ClientEventHandlers {
 
     private static void onColorHandlerEvent(ColorHandlerEvent.Item event) {
         ItemColors colors = event.getItemColors();
-        CHICKEN_REGISTRY.getChickens().forEach(((s, resourceChickenData) -> {
+
+        ChickenRegistry.getRegistry().getChickens().forEach((s, resourceChickenData) -> {
             colors.register(SupplierSpawnEggItem::getColor, resourceChickenData.getSpawnEggItemRegistryObject().get());
-        }));
+        });
     }
 }
