@@ -1,10 +1,7 @@
 package crimsonfluff.crimsonchickens.init;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
-import crimsonfluff.crimsonchickens.blocks.Nest;
 import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
-import net.minecraft.block.Block;
-import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.block.entity.BlockEntityType;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.registry.Registry;

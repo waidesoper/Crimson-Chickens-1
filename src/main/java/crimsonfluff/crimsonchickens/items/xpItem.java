@@ -1,6 +1,7 @@
 package crimsonfluff.crimsonchickens.items;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
+import crimsonfluff.crimsonchickens.init.initItems;
 import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -30,8 +31,8 @@ public class xpItem extends Item {
         int isAmount = 0;
         ItemStack stack;
 
-        Vec3d vec = playerIn.getPos().add(playerIn.getLookAngle().multiply(2, 0, 2));
-        ((ServerWorld) worldIn).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.XP_ITEM.get())),
+        Vec3d vec = playerIn.getPos().add(playerIn.getRotationVector().multiply(2, 0, 2));
+        ((ServerWorld) worldIn).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.XP_ITEM)),
             vec.x, playerIn.getEyeY(), vec.z, 20, 0.5f, 0.5f, 0.5f, 0);
 
         if (playerIn.isSneaking()) {

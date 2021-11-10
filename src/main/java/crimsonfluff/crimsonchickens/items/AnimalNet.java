@@ -143,7 +143,6 @@ public class AnimalNet extends Item {
                 }
                 else
                     return ActionResult.CONSUME;       // stops the arm swing animation ?
-
             }
             else
                 return ActionResult.CONSUME;       // stops the arm swing animation ?
@@ -157,9 +156,7 @@ public class AnimalNet extends Item {
 
         if (compound == null) return ActionResult.FAIL;
 
-//        Entity entity = ForgeRegistries.ENTITIES.getValue(new Identifier(compound.getString("id"))).create(context.getWorld());
         Entity entity = Registry.ENTITY_TYPE.get(new Identifier(compound.getString("id"))).create(context.getWorld());
-
         if (entity != null) {
             BlockPos pos = context.getBlockPos().offset(context.getSide());
             int yPos = pos.getY();
@@ -181,7 +178,6 @@ public class AnimalNet extends Item {
             context.getStack().damage(1, context.getPlayer(), plyr -> plyr.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
 
             return ActionResult.SUCCESS;
-
         }
         else
             return ActionResult.FAIL;

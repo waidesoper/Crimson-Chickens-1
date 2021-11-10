@@ -8,14 +8,11 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemPlacementContext;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.NameTagItem;
-import net.minecraft.particle.ParticleTypes;
-import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.BlockSoundGroup;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.state.StateManager;
 import net.minecraft.state.property.DirectionProperty;
-import net.minecraft.state.property.Property;
 import net.minecraft.util.*;
 import net.minecraft.util.function.BooleanBiFunction;
 import net.minecraft.util.hit.BlockHitResult;
@@ -26,10 +23,8 @@ import net.minecraft.util.shape.VoxelShape;
 import net.minecraft.util.shape.VoxelShapes;
 import net.minecraft.world.BlockView;
 import net.minecraft.world.World;
-import net.minecraftforge.items.ItemHandlerHelper;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Random;
 import java.util.stream.Stream;
 
 public class Nest extends Block implements BlockEntityProvider  {
@@ -89,7 +84,7 @@ public class Nest extends Block implements BlockEntityProvider  {
 
     @Override
     protected void appendProperties(StateManager.Builder<Block, BlockState> builder) {
-        builder.add(new Property[]{FACING, OPEN});
+        builder.add(FACING);
     }
 
     public BlockRenderType getRenderType(BlockState state) {
@@ -161,22 +156,23 @@ public class Nest extends Block implements BlockEntityProvider  {
         // Note: Can not shift click seeds into the nest. This method is not called
         // try and insert item into the Nest, it only accepts seeds, so if returns .isEmpty()
         // then it must have been a seed, and must have been inserted
-        if (ItemHandlerHelper.insertItem(te.STORED_ITEMS, new ItemStack(item, 1), false).isEmpty()) {
-            Random r = new Random();
-            for (int a = 0; a < 4; a++) {
-                double d0 = r.nextGaussian() * 0.2D;
-                double d1 = r.nextGaussian() * 0.2D;
-                double d2 = r.nextGaussian() * 0.2D;
-
-                if (te.entityCaptured != null)
-                    ((ServerWorld) world).spawnParticles(ParticleTypes.HEART, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, d0, d1, d2, 0);
-            }
-
-            if (! player.isCreative()) itemStack.decrement(1);
-            te.sendUpdates();
-
-            return ActionResult.SUCCESS;
-        }
+//TODO:
+//        if (ItemHandlerHelper.insertItem(te.STORED_ITEMS, new ItemStack(item, 1), false).isEmpty()) {
+//            Random r = new Random();
+//            for (int a = 0; a < 4; a++) {
+//                double d0 = r.nextGaussian() * 0.2D;
+//                double d1 = r.nextGaussian() * 0.2D;
+//                double d2 = r.nextGaussian() * 0.2D;
+//
+//                if (te.entityCaptured != null)
+//                    ((ServerWorld) world).spawnParticles(ParticleTypes.HEART, pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5, 1, d0, d1, d2, 0);
+//            }
+//
+//            if (! player.isCreative()) itemStack.decrement(1);
+//            te.sendUpdates();
+//
+//            return ActionResult.SUCCESS;
+//        }
 
         // inc. modded name tags?
         // blank name tags will remove name

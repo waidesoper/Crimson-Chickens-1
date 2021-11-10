@@ -1,10 +1,8 @@
 package crimsonfluff.crimsonchickens.json;
 
 import com.google.gson.JsonArray;
-import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
-import net.minecraftforge.fml.RegistryObject;
 
 public class ResourceChickenData {
     //private static RegistryObject<Item> spawnEggItemRegistryObject;
@@ -47,7 +45,6 @@ public class ResourceChickenData {
 
     public Identifier chickenTexture = null;
 
-    private transient RegistryObject<Item> spawnEggItemRegistryObject;
     private transient Identifier entityTypeRegistryID;
 
     public Identifier getEntityTypeRegistryID() {
@@ -58,11 +55,13 @@ public class ResourceChickenData {
         this.entityTypeRegistryID = this.entityTypeRegistryID == null ? entityTypeRegistryID : this.entityTypeRegistryID;
     }
 
-    public RegistryObject<Item> getSpawnEggItemRegistryObject() {
-        return spawnEggItemRegistryObject;
-    }
 
-    public void setSpawnEggItemRegistryObject(RegistryObject<Item> spawnEggItemRegistryObject) {
-        this.spawnEggItemRegistryObject = this.spawnEggItemRegistryObject == null ? spawnEggItemRegistryObject : this.spawnEggItemRegistryObject;
-    }
+    // TODO: SpawnEggs
+//    private transient RegistryObject<Item> spawnEggItemRegistryObject;
+//    public RegistryObject<Item> getSpawnEggItemRegistryObject() {
+//        return spawnEggItemRegistryObject;
+//    }
+//    public void setSpawnEggItemRegistryObject(RegistryObject<Item> spawnEggItemRegistryObject) {
+//        this.spawnEggItemRegistryObject = this.spawnEggItemRegistryObject == null ? spawnEggItemRegistryObject : this.spawnEggItemRegistryObject;
+//    }
 }

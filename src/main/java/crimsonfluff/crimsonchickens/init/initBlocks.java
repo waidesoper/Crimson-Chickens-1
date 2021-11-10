@@ -27,7 +27,7 @@ public class initBlocks {
         Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "nest"), NEST_BLOCK);
 
         // TODO set harvest tool (AXE)
-        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "duck_egg_block"), EGG_BLOCK);
-        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "egg_block"), DUCK_EGG_BLOCK);
+        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "duck_egg_block"), DUCK_EGG_BLOCK);
+        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "egg_block"), EGG_BLOCK);
     }
 }

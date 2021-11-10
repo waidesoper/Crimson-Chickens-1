@@ -280,7 +280,8 @@ public class ResourceChickenEntity extends ChickenEntity {
 
     @Override
     public boolean canBreedWith(AnimalEntity entityIn) {
-        if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 0) return false;
+// TODO:
+//        if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 0) return false;
 
         if (this.isInLove() && entityIn.isInLove()) {
             ResourceChickenEntity rce = null;
@@ -289,10 +290,10 @@ public class ResourceChickenEntity extends ChickenEntity {
 
             if (rce == null) return false;
 
-            if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 2) {
-                if (! chickenData.canBreed) return false;
-                if (! rce.chickenData.canBreed) return false;
-            }
+//            if (CrimsonChickens.CONFIGURATION.masterSwitchBreeding.get() == 2) {
+//                if (! chickenData.canBreed) return false;
+//                if (! rce.chickenData.canBreed) return false;
+//            }
 
             // only ducks can breed with ducks !
             if (chickenData.hasTrait == 1 && rce.chickenData.hasTrait != 1) return false;
@@ -303,10 +304,10 @@ public class ResourceChickenEntity extends ChickenEntity {
             if (chickenData.name.equals(rce.chickenData.name)) return true;
 
             // if breeding with vanilla-replacement chickens...
-            if (chickenData.name.equals("chicken") || rce.chickenData.name.equals("chicken"))
-                return (CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get() > 0);
-
-            return (CrimsonChickens.CONFIGURATION.allowCrossBreeding.get());
+//            if (chickenData.name.equals("chicken") || rce.chickenData.name.equals("chicken"))
+//                return (CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get() > 0);
+//
+//            return (CrimsonChickens.CONFIGURATION.allowCrossBreeding.get());
         }
 
         return false;
@@ -323,7 +324,7 @@ public class ResourceChickenEntity extends ChickenEntity {
         if (rce != null) {
             // if both chickens are the same... coal and coal, mr duck and mr duck
             if (chickenData.name.equals(rce.chickenData.name)) {
-                if ((newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn)) != null)
+                if ((newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn)) != null)
                     increaseStats(newChicken, this, rce, worldIn.random);
 
                 return newChicken;
@@ -334,9 +335,9 @@ public class ResourceChickenEntity extends ChickenEntity {
                 // chance of getting either a source duck, or a target duck, in case a mod extends my duck?
                 // or two or more registered ducks (Mr_Duck and Mrs_Duck eg)
                 if (worldIn.random.nextInt(2) == 0)
-                    newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
+                    newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn);
                 else
-                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
+                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
 
                 return newChicken;
             }
@@ -345,10 +346,11 @@ public class ResourceChickenEntity extends ChickenEntity {
             if (chickenData.name.equals("chicken")) {
                 int r = worldIn.random.nextInt(100) + 1;
 
-                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
-                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
-                else
-                    newChicken = initEntities.getModChickens().get("chicken").get().create(worldIn);
+                // TODO:
+//                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
+//                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
+//                else
+                    newChicken = initEntities.getModChickens().get("chicken").create(worldIn);
 
                 return newChicken;
 
@@ -356,45 +358,47 @@ public class ResourceChickenEntity extends ChickenEntity {
             else if (rce.chickenData.name.equals("chicken")) {
                 int r = worldIn.random.nextInt(100) + 1;
 
-                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
-                    newChicken = initEntities.getModChickens().get(chickenData.name).get().create(worldIn);
-                else
-                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).get().create(worldIn);
+                // TOOD:
+//                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
+//                    newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn);
+//                else
+                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
 
                 return newChicken;
             }
 
             // Work out cross-breeding types
-            if (CrimsonChickens.CONFIGURATION.allowCrossBreeding.get()) {
-                String parentA = this.chickenData.getEntityTypeRegistryID().toString();
-                String parentB = ((ResourceChickenEntity) ageableEntity).chickenData.getEntityTypeRegistryID().toString();
-
-                List<String> lst = new ArrayList<>();
-                lst.add(this.chickenData.name);
-                lst.add(rce.chickenData.name);
-
-                boolean a, b;
-                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
-                    String string = entry.getKey();
-                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(string);
-
-                    a = (Objects.equals(chickenData.parentA, parentA) && Objects.equals(chickenData.parentB, parentB));
-                    b = (Objects.equals(chickenData.parentA, parentB) && Objects.equals(chickenData.parentB, parentA));
-
-                    if (a || b) {
-                        lst.add(string);
-
-                        break;
-                    }
-                }
-
-                // chance to produce parentA, parentB or crossBreedChild (if there is one)
-                worldIn.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.BLOCKS, 1f, 1f);
-
-                int r = this.world.random.nextInt(lst.size());
-                newChicken = initEntities.getModChickens().get(lst.get(r)).get().create(this.world);
-                return newChicken;
-            }
+// TODO:
+//            if (CrimsonChickens.CONFIGURATION.allowCrossBreeding.get()) {
+//                String parentA = this.chickenData.getEntityTypeRegistryID().toString();
+//                String parentB = ((ResourceChickenEntity) ageableEntity).chickenData.getEntityTypeRegistryID().toString();
+//
+//                List<String> lst = new ArrayList<>();
+//                lst.add(this.chickenData.name);
+//                lst.add(rce.chickenData.name);
+//
+//                boolean a, b;
+//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+//                    String string = entry.getKey();
+//                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(string);
+//
+//                    a = (Objects.equals(chickenData.parentA, parentA) && Objects.equals(chickenData.parentB, parentB));
+//                    b = (Objects.equals(chickenData.parentA, parentB) && Objects.equals(chickenData.parentB, parentA));
+//
+//                    if (a || b) {
+//                        lst.add(string);
+//
+//                        break;
+//                    }
+//                }
+//
+//                // chance to produce parentA, parentB or crossBreedChild (if there is one)
+//                worldIn.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.BLOCKS, 1f, 1f);
+//
+//                int r = this.world.random.nextInt(lst.size());
+//                newChicken = initEntities.getModChickens().get(lst.get(r)).get().create(this.world);
+//                return newChicken;
+//            }
 
             return null;        // this should never be reached?
         }
@@ -407,14 +411,14 @@ public class ResourceChickenEntity extends ChickenEntity {
         if (stack.isEmpty()) return false;
 
         // Can use resource drop as food/breed, *and* regular food (seeds)
-        if (CrimsonChickens.CONFIGURATION.dropAsBreedingItem.get()) {
-            if (stack.hasTag() && ! chickenData.dropItemNBT.isEmpty())
-                return chickenData.dropItemNBT == stack.getTag();                               // TODO: Test this
-            else
-                return (stack.getItem().toString().equals(chickenData.dropItemItem));           // MUST use resource drop as food/breed item
-        }
-
-        else
+//        if (CrimsonChickens.CONFIGURATION.dropAsBreedingItem.get()) {
+//            if (stack.hasTag() && ! chickenData.dropItemNBT.isEmpty())
+//                return chickenData.dropItemNBT == stack.getTag();                               // TODO: Test this
+//            else
+//                return (stack.getItem().toString().equals(chickenData.dropItemItem));           // MUST use resource drop as food/breed item
+//        }
+//
+//        else
             return FOOD_ITEMS.test(stack);
     }
 
@@ -447,7 +451,8 @@ public class ResourceChickenEntity extends ChickenEntity {
             PlayerEntity playerIn = (PlayerEntity) damageSource.getSource();
             PlayerInventory playerInv = playerIn.inventory;
 
-            NbtList lst = this.getPersistentData().getList("Inventory", 10);
+//            NbtList lst = this.getPersistentData().getList("Inventory", 10);
+            NbtList lst = new NbtList();
 
             for (int i = 0; i < lst.size(); ++ i) {
                 NbtCompound NbtCompound = lst.getCompound(i);
@@ -484,12 +489,14 @@ public class ResourceChickenEntity extends ChickenEntity {
                 this.world.createExplosion(this, this.getX(), this.getY(), this.getZ(), 10, destructionType);
                 this.remove();
 
-                if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.explode"), 10);
+                // TODO:
+//                if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.explode"), 10);
             }
         }
         else if (chickenData.hasTrait == 4) {
-            if (! this.world.isClient)
-                if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.thorns"), 1);
+//            if (! this.world.isClient)
+//                // TODO:
+//                if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.thorns"), 1);
         }
     }
 
@@ -512,8 +519,9 @@ public class ResourceChickenEntity extends ChickenEntity {
                 }
             }
             else if (chickenData.hasTrait == 4) {
-                if (! this.world.isClient)
-                    if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.thorns"), 1);
+//TODO:
+                //                if (! this.world.isClient)
+//                    if (damageSource.getSource() != null) damageSource.getSource().damage(new DamageSource("chicken.thorns"), 1);
             }
         }
 
@@ -552,7 +560,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 
     @Override
     protected void dropLoot(DamageSource damageSource, boolean applyLuckFromLastHurtByPlayer) {
-        if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return;
+//        if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return;
 
         Identifier resourcelocation;
         if (chickenData.hasTrait == 1)
@@ -571,11 +579,11 @@ public class ResourceChickenEntity extends ChickenEntity {
 
     @Override
     protected void dropEquipment(DamageSource damageSource, int lootingMultiplier, boolean allowDrops) {
-        if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return; // TODO: <- redo this
+//        if (! CrimsonChickens.CONFIGURATION.allowFakeplayerLootDrops.get()) return; // TODO: <- redo this
 
         int r = new Random().nextInt(100) + 1;
-        if (r <= CrimsonChickens.CONFIGURATION.allowDeathDropResource.get())
-            CrimsonChickens.calcDrops(this.dataTracker.get(GAIN), chickenData, lootingMultiplier).forEach(this::spawnAtLocation);
+//        if (r <= CrimsonChickens.CONFIGURATION.allowDeathDropResource.get())
+//            CrimsonChickens.calcDrops(this.dataTracker.get(GAIN), chickenData, lootingMultiplier).forEach(this::spawnAtLocation);
     }
 
     @Override
@@ -731,100 +739,100 @@ public class ResourceChickenEntity extends ChickenEntity {
 
     @Override       // shearing and converting
     public ActionResult interactMob(PlayerEntity playerIn, Hand handIn) {
-        // fired once per hand !, so twice !!
-        if ((! playerIn.world.isClient) && playerIn.getActiveHand() == handIn) {
-            ItemStack itemStack = playerIn.getMainHandStack();
-
-            if (! itemStack.isEmpty()) {
-                if (FOOD_ITEMS.test(itemStack))
-                    return super.interactMob(playerIn, handIn);     // mainly controls food
-
-                if (itemStack.getItem() instanceof ShearsItem) {
-                    if (CrimsonChickens.CONFIGURATION.allowShearingChickens.get()) {
-                        itemStack.damage(1, playerIn, plyr -> plyr.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
-
-                        World world = playerIn.world;
-                        BlockPos pos = playerIn.getBlockPos();
-
-                        this.damage(new DamageSource("death.attack.shears"), 1);
-                        ((ServerWorld) world).spawnParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + this.getEyeY(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
-
-                        world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
-
-                        world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(),
-                            this.chickenData.hasTrait == 1
-                                ? new ItemStack(initItems.FEATHER_DUCK)
-                                : new ItemStack(Items.FEATHER)));
-
-                        return ActionResult.SUCCESS;
-                    }
-
-                    return ActionResult.FAIL;
-                }
-
-                // Conversion only works on 'Vanilla' chickens
-                if (! CrimsonChickens.CONFIGURATION.allowConvertingVanilla.get()) return ActionResult.FAIL;
-                if (! this.chickenData.name.equals("chicken")) return ActionResult.FAIL;
-
-                // loop thru registry and find dropItem that matches item player is holding (itemStack)
-                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
-                    String name = entry.getKey();
-                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
-
-//                    playerIn.displayClientMessage(new StringTextComponent(chickenData.dropItemItem).append(" : ").append(itemStack.getItem().getRegistryName().toString()), false);
-
-                    if (chickenData.dropItemItem.equals(itemStack.getItem().getRegistryName().toString())) {
-                        if (! playerIn.isCreative()) itemStack.decrement(1);
-
-                        if (this.conversionCount % 4 == 0) {
-                            ((ServerWorld) playerIn.world).spawnParticles(ParticleTypes.HAPPY_VILLAGER,
-                                this.getX(), this.getY() + 0.5, this.getZ(),
-                                100, 1, 1, 1, 0);
-                        }
-
-                        // if converting a partly already converted chicken then reset/remove type/count
-                        if (! chickenData.dropItemItem.equals(this.conversionType)) {
-                            this.getPersistentData().remove("Mutation");
-
-                            this.conversionCount = 1;
-                            this.conversionRequired = chickenData.conversion;
-                            this.conversionType = chickenData.dropItemItem;
-                            this.conversionDescID = Registry.ITEM.get(new Identifier(this.conversionType)).getTranslationKey();
-
-                        }
-                        else {
-                            this.conversionCount++;
-                        }
-
-                        if (this.conversionCount >= chickenData.conversion) {
-                            this.remove();
-
-                            playerIn.world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.AMBIENT, 1f, 1f);
-                            ((ServerWorld) playerIn.world).spawnParticles(ParticleTypes.POOF,
-                                this.getX(), this.getY() + 0.5, this.getZ(),200, 1, 1, 1, 0);
-
-                            ResourceChickenEntity newChick = initEntities.getModChickens().get(chickenData.name).get().create(playerIn.world);
-                            newChick.copyFrom(this);
-
-                            if (this.hasCustomName()) {
-                                newChick.setCustomName(this.getCustomName());
-                                newChick.setCustomNameVisible(this.isCustomNameVisible());
-                            }
-
-                            newChick.setInvulnerable(this.isInvulnerable());
-
-//                        newChick.setYHeadRot(targetChicken.getYHeadRot());
-                            playerIn.world.spawnEntity(newChick);
-                        }
-
-                        return ActionResult.SUCCESS;
-                    }
-                }
-
-                return ActionResult.FAIL;
-            }
-        }
-
+//        // fired once per hand !, so twice !!
+//        if ((! playerIn.world.isClient) && playerIn.getActiveHand() == handIn) {
+//            ItemStack itemStack = playerIn.getMainHandStack();
+//
+//            if (! itemStack.isEmpty()) {
+//                if (FOOD_ITEMS.test(itemStack))
+//                    return super.interactMob(playerIn, handIn);     // mainly controls food
+//
+//                if (itemStack.getItem() instanceof ShearsItem) {
+//                    if (CrimsonChickens.CONFIGURATION.allowShearingChickens.get()) {
+//                        itemStack.damage(1, playerIn, plyr -> plyr.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
+//
+//                        World world = playerIn.world;
+//                        BlockPos pos = playerIn.getBlockPos();
+//
+//                        this.damage(new DamageSource("death.attack.shears"), 1);
+//                        ((ServerWorld) world).spawnParticles(ParticleTypes.CRIT, pos.getX(), pos.getY() + this.getEyeY(), pos.getZ(), 10, 0.5, 0.5, 0.5, 0);
+//
+//                        world.playSound(null, pos, SoundEvents.ENTITY_SHEEP_SHEAR, SoundCategory.PLAYERS, 1f, 1f);
+//
+//                        world.spawnEntity(new ItemEntity(world, pos.getX(), pos.getY(), pos.getZ(),
+//                            this.chickenData.hasTrait == 1
+//                                ? new ItemStack(initItems.FEATHER_DUCK)
+//                                : new ItemStack(Items.FEATHER)));
+//
+//                        return ActionResult.SUCCESS;
+//                    }
+//
+//                    return ActionResult.FAIL;
+//                }
+//
+//                // Conversion only works on 'Vanilla' chickens
+//                if (! CrimsonChickens.CONFIGURATION.allowConvertingVanilla.get()) return ActionResult.FAIL;
+//                if (! this.chickenData.name.equals("chicken")) return ActionResult.FAIL;
+//
+//                // loop thru registry and find dropItem that matches item player is holding (itemStack)
+//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+//                    String name = entry.getKey();
+//                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
+//
+////                    playerIn.displayClientMessage(new StringTextComponent(chickenData.dropItemItem).append(" : ").append(itemStack.getItem().getRegistryName().toString()), false);
+//
+//                    if (chickenData.dropItemItem.equals(itemStack.getItem().getRegistryName().toString())) {
+//                        if (! playerIn.isCreative()) itemStack.decrement(1);
+//
+//                        if (this.conversionCount % 4 == 0) {
+//                            ((ServerWorld) playerIn.world).spawnParticles(ParticleTypes.HAPPY_VILLAGER,
+//                                this.getX(), this.getY() + 0.5, this.getZ(),
+//                                100, 1, 1, 1, 0);
+//                        }
+//
+//                        // if converting a partly already converted chicken then reset/remove type/count
+//                        if (! chickenData.dropItemItem.equals(this.conversionType)) {
+//                            this.getPersistentData().remove("Mutation");
+//
+//                            this.conversionCount = 1;
+//                            this.conversionRequired = chickenData.conversion;
+//                            this.conversionType = chickenData.dropItemItem;
+//                            this.conversionDescID = Registry.ITEM.get(new Identifier(this.conversionType)).getTranslationKey();
+//
+//                        }
+//                        else {
+//                            this.conversionCount++;
+//                        }
+//
+//                        if (this.conversionCount >= chickenData.conversion) {
+//                            this.remove();
+//
+//                            playerIn.world.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_GENERIC_EXPLODE, SoundCategory.AMBIENT, 1f, 1f);
+//                            ((ServerWorld) playerIn.world).spawnParticles(ParticleTypes.POOF,
+//                                this.getX(), this.getY() + 0.5, this.getZ(),200, 1, 1, 1, 0);
+//
+//                            ResourceChickenEntity newChick = initEntities.getModChickens().get(chickenData.name).get().create(playerIn.world);
+//                            newChick.copyFrom(this);
+//
+//                            if (this.hasCustomName()) {
+//                                newChick.setCustomName(this.getCustomName());
+//                                newChick.setCustomNameVisible(this.isCustomNameVisible());
+//                            }
+//
+//                            newChick.setInvulnerable(this.isInvulnerable());
+//
+////                        newChick.setYHeadRot(targetChicken.getYHeadRot());
+//                            playerIn.world.spawnEntity(newChick);
+//                        }
+//
+//                        return ActionResult.SUCCESS;
+//                    }
+//                }
+//
+//                return ActionResult.FAIL;
+//            }
+//        }
+//
         return super.interactMob(playerIn, handIn);     // mainly controls food
     }
 }

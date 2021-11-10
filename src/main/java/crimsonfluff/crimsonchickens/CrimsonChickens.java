@@ -2,9 +2,6 @@ package crimsonfluff.crimsonchickens;
 
 import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
-import crimsonfluff.simplemagnet.config.SimpleMagnetConfig;
-import me.shedaniel.autoconfig.AutoConfig;
-import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.block.Blocks;
@@ -24,21 +21,23 @@ public class CrimsonChickens implements ModInitializer {
     public static final String MOD_ID = "crimsonchickens";
     public static final Logger LOGGER = LogManager.getLogger(CrimsonChickens.class);
 
-    public static CrimsonChickensConfig CONFIG;
+//    public static CrimsonChickensConfig CONFIG;
 
-    public static final ItemGroup CRIMSON_CHICKENS_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "Crimson Chickens"), () -> new ItemStack(Blocks.COBBLESTONE));
+    public static final ItemGroup CRIMSON_CHICKENS_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "stuff"), () -> new ItemStack(Blocks.COBBLESTONE));
 
 
     @Override
     public void onInitialize() {
-        AutoConfig.register(SimpleMagnetConfig.class, GsonConfigSerializer::new);
-        CONFIG = AutoConfig.getConfigHolder(CrimsonChickensConfig.class).getConfig();
+//        AutoConfig.register(SimpleMagnetConfig.class, GsonConfigSerializer::new);
+//        CONFIG = AutoConfig.getConfigHolder(CrimsonChickensConfig.class).getConfig();
 
         initConfigs.register();
         initItems.register();
         initBlocks.register();
         initTiles.register();
         initSounds.register();
+
+        initChickenConfigs.loadConfigs();
 
 //        ModPacketsC2S.register();
     }

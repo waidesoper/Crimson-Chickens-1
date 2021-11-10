@@ -11,32 +11,18 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.entity.BlockEntity;
 import net.minecraft.inventory.Inventories;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.NetworkManager;
-import net.minecraft.network.play.server.SUpdateTileEntityPacket;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleTypes;
-import net.minecraft.particles.ItemParticleData;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.items.CapabilityItemHandler;
-import net.minecraftforge.items.IItemHandler;
-import net.minecraftforge.items.ItemHandlerHelper;
-
-import javax.annotation.Nullable;
 
 public class NestTileEntity extends BlockEntity implements Tickable, ImplementedInventory {
-    private LazyOptional<IItemHandler> outputItemHandlerCached = null;
-
     public final DefaultedList<ItemStack> STORED_ITEMS = DefaultedList.ofSize(4, ItemStack.EMPTY);
 
     @Override
@@ -58,37 +44,29 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
         super(initTiles.NEST_BLOCK_TILE);
     }
 
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-        if (! this.isRemoved() && cap == CapabilityItemHandler.ITEM_HANDLER_CAPABILITY)
-            return LazyOptional.of(() -> STORED_ITEMS).cast();
-
-        return super.getCapability(cap, side);
-    }
-
-    @Override       // store anything here that updates and is needed by the NestRenderer
-    public NbtCompound getUpdateTag() {
-        NbtCompound compound = super.getUpdateTag();
-
-        if (this.entityCaptured != null)
-            compound.put("entityCaptured", this.entityCaptured);
-
-        if (! this.entityDescription.isEmpty())
-            compound.putString("entityDescription", this.entityDescription);
-
-        if (CrimsonChickens.CONFIGURATION.renderItems.get())
-            Inventories.writeNbt(compound, STORED_ITEMS);        // TODO: this changed `Inventory` to `Items` (needed for render)
-
-        //CrimsonChickens.LOGGER.info("getUpdateTagNBT: " + compound);
-
-        //sendUpdates();
-
-        return compound;
-    }
+//    @Override       // store anything here that updates and is needed by the NestRenderer
+//    public NbtCompound getUpdateTag() {
+//        NbtCompound compound = super.getUpdateTag();
+//
+//        if (this.entityCaptured != null)
+//            compound.put("entityCaptured", this.entityCaptured);
+//
+//        if (! this.entityDescription.isEmpty())
+//            compound.putString("entityDescription", this.entityDescription);
+//
+//        if (CrimsonChickens.CONFIGURATION.renderItems.get())
+//            Inventories.writeNbt(compound, STORED_ITEMS);        // TODO: this changed `Inventory` to `Items` (needed for render)
+//
+//        //CrimsonChickens.LOGGER.info("getUpdateTagNBT: " + compound);
+//
+//        //sendUpdates();
+//
+//        return compound;
+//    }
 
     @Override
-    public void readNbt(NbtCompound compound) {
-        super.readNbt(compound);
+    public void fromTag(BlockState state, NbtCompound compound) {
+        super.fromTag(state, compound);
 
         entityRemove(false);
 
@@ -157,66 +135,68 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
                     // dont allow mods to use this.storedItems as an inventory
                     // so isValidItem returns false
                     // but we need to put items into this.storedItems
-                    CrimsonChickens.calcDrops(this.chickenGain, this.chickenData, 0)
-                        .forEach(this.STORED_ITEMS::insertItemAnySlot);
 
-                    // try to push items into inventory below, not seeds (slot(0))
-                    if (getOutputItemHandlerCached().isPresent()) {
-                        for (int slot = 1; slot < this.STORED_ITEMS.size(); slot++) {
-                            int finalSlot = slot;
-                            ItemStack result = getOutputItemHandlerCached()
-                                .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler,
-                                    this.STORED_ITEMS.get(finalSlot), false))
-                                .orElse(ItemStack.EMPTY);
-
-                            this.STORED_ITEMS.set(slot, result);
-                        }
-                    }
+// TODO:
+//                    CrimsonChickens.calcDrops(this.chickenGain, this.chickenData, 0)
+//                        .forEach(this.STORED_ITEMS::insertItemAnySlot);
+//
+//                    // try to push items into inventory below, not seeds (slot(0))
+//                    if (getOutputItemHandlerCached().isPresent()) {
+//                        for (int slot = 1; slot < this.STORED_ITEMS.size(); slot++) {
+//                            int finalSlot = slot;
+//                            ItemStack result = getOutputItemHandlerCached()
+//                                .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler,
+//                                    this.STORED_ITEMS.get(finalSlot), false))
+//                                .orElse(ItemStack.EMPTY);
+//
+//                            this.STORED_ITEMS.set(slot, result);
+//                        }
+//                    }
 
                     // if rendering items in Nest update the NestRenderer
-                    if (CrimsonChickens.CONFIGURATION.renderItems.get()) sendUpdates();
+//                    if (CrimsonChickens.CONFIGURATION.renderItems.get()) sendUpdates();
                 }
             }
         }
     }
 
-    public void updateCache() {
-        BlockEntity tileEntity = world != null ? world.getBlockEntity(pos.down()) : null;
-        if (tileEntity != null) {
-            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+//    public void updateCache() {
+//        BlockEntity tileEntity = world != null ? world.getBlockEntity(pos.down()) : null;
+//        if (tileEntity != null) {
+//            LazyOptional<IItemHandler> lazyOptional = tileEntity.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, Direction.UP);
+//
+//            if (lazyOptional.isPresent()) {
+//                if (this.outputItemHandlerCached != lazyOptional) {
+//                    this.outputItemHandlerCached = lazyOptional;
+//                    outputItemHandlerCached.addListener(lazy -> updateCache());
+//                }
+//            }
+//            else outputItemHandlerCached = LazyOptional.empty();
+//        }
+//        else outputItemHandlerCached = LazyOptional.empty();
+//    }
+//
+//    private LazyOptional<IItemHandler> getOutputItemHandlerCached() {
+//        if (outputItemHandlerCached == null) updateCache();
+//        return outputItemHandlerCached;
+//    }
 
-            if (lazyOptional.isPresent()) {
-                if (this.outputItemHandlerCached != lazyOptional) {
-                    this.outputItemHandlerCached = lazyOptional;
-                    outputItemHandlerCached.addListener(lazy -> updateCache());
-                }
-            }
-            else outputItemHandlerCached = LazyOptional.empty();
-        }
-        else outputItemHandlerCached = LazyOptional.empty();
-    }
-
-    private LazyOptional<IItemHandler> getOutputItemHandlerCached() {
-        if (outputItemHandlerCached == null) updateCache();
-        return outputItemHandlerCached;
-    }
-
-    @Override
-    public void handleUpdateTag(BlockState state, NbtCompound tag) {
-        readNbt(tag);
-    }
-
-    @Nullable
-    @Override
-    public SUpdateTileEntityPacket getUpdatePacket() {
-        return new SUpdateTileEntityPacket(worldPosition, 1, getUpdateTag());
-    }
-
-    @Override
-    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
-        CompoundNBT nbt = pkt.getTag();
-        handleUpdateTag(getBlockState(), nbt);
-    }
+//    @Override
+//    public void handleUpdateTag(BlockState state, NbtCompound tag) {
+//        readNbt(tag);
+//    }
+//
+//    @Nullable
+//    @Override
+//    public SUpdateTileEntityPacket getUpdatePacket() {
+//        return new SUpdateTileEntityPacket(worldPosition, 1, getUpdateTag());
+//    }
+//
+//    @Override
+//    public void onDataPacket(NetworkManager net, SUpdateTileEntityPacket pkt) {
+//        CompoundNBT nbt = pkt.getTag();
+//        handleUpdateTag(getBlockState(), nbt);
+//    }
 
     public void entityRemove(boolean sendUpdates) {
         this.chickenAge = 0;
@@ -262,11 +242,11 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
             if (compound != null && compound.contains("Name", 8)) {
                 try {
                     String name = compound.getString("Name");
-                    Text itextcomponent = Text.Serializer.fromJson(name);
+                    Text text = Text.Serializer.fromJson(name);
 
-                    if (itextcomponent != null) {
+                    if (text != null) {
                         this.entityCaptured.putString("CustomName", name);
-                        this.entityCustomName = itextcomponent;
+                        this.entityCustomName = text;
                         return;
                     }
                 } catch (JsonParseException e) {
