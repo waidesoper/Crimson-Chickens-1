@@ -1,6 +1,5 @@
 package crimsonfluff.crimsonchickens.entity;
 
-import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.client.DuckEggProjectileSpawnPacket;
 import crimsonfluff.crimsonchickens.client.clientStuff;
 import crimsonfluff.crimsonchickens.init.initEntities;
@@ -9,7 +8,6 @@ import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
-import net.minecraft.client.util.NetworkUtils;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FlyingItemEntity;
 import net.minecraft.entity.LivingEntity;
@@ -93,6 +91,6 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
 
     @Override
     public Packet createSpawnPacket() {
-        return DuckEggProjectileSpawnPacket.create(this, clientStuff.PacketID);
+        return DuckEggProjectileSpawnPacket.create(this, clientStuff.DUCKEGG_SPAWN_PACKET);
     }
 }
