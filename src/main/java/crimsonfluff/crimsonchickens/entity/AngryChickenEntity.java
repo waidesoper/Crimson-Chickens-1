@@ -3,11 +3,14 @@ package crimsonfluff.crimsonchickens.entity;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.minecraft.entity.EntityType;
-import net.minecraft.entity.ai.attributes.AttributeModifierMap;
-import net.minecraft.entity.ai.attributes.Attributes;
-import net.minecraft.entity.ai.goal.*;
+import net.minecraft.entity.ai.goal.AnimalMateGoal;
+import net.minecraft.entity.ai.goal.FollowTargetGoal;
+import net.minecraft.entity.ai.goal.LookAtEntityGoal;
+import net.minecraft.entity.ai.goal.SwimGoal;
+import net.minecraft.entity.attribute.DefaultAttributeContainer;
+import net.minecraft.entity.attribute.EntityAttributes;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NbtCompound;
 import net.minecraft.world.World;
 
 public class AngryChickenEntity extends ResourceChickenEntity {
@@ -15,31 +18,32 @@ public class AngryChickenEntity extends ResourceChickenEntity {
         super(type, world, chickenData);
     }
 
-    public static AttributeModifierMap.MutableAttribute createChickenAttributes(String name) {
+    public static DefaultAttributeContainer.Builder  createChickenAttributes(String name) {
         ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
 
         return createMobAttributes()
-            .add(Attributes.ATTACK_DAMAGE, 1)
-            .add(Attributes.ATTACK_KNOCKBACK, 1)
-            .add(Attributes.KNOCKBACK_RESISTANCE, 0)
-            .add(Attributes.MAX_HEALTH, chickenData.baseHealth)
-            .add(Attributes.MOVEMENT_SPEED, chickenData.baseSpeed);
+            .add(EntityAttributes.GENERIC_ATTACK_DAMAGE, 1)
+            .add(EntityAttributes.GENERIC_ATTACK_KNOCKBACK, 1)
+            .add(EntityAttributes.GENERIC_KNOCKBACK_RESISTANCE, 0)
+            .add(EntityAttributes.GENERIC_MAX_HEALTH, chickenData.baseHealth)
+            .add(EntityAttributes.GENERIC_MOVEMENT_SPEED, chickenData.baseSpeed);
     }
 
     @Override
-    protected void registerGoals() {
-        this.goalSelector.addGoal(1, new SwimGoal(this));
-        this.targetSelector.addGoal(2, new NearestAttackableTargetGoal<>(this, PlayerEntity.class, true));
-        this.goalSelector.addGoal(3, new LookAtGoal(this, PlayerEntity.class, 8.0F));
-        this.goalSelector.addGoal(4, new AngryChickenGoal(this, 1.3D, true));
-        this.goalSelector.addGoal(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
-        this.goalSelector.addGoal(6, new BreedGoal(this, 1.0D));
+    protected void initGoals() {
+        this.goalSelector.add(1, new SwimGoal(this));
+        this.targetSelector.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+        this.goalSelector.add(3, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
+        this.goalSelector.add(4, new AngryChickenGoal(this, 1.3D, true));
+        // TODO
+        //        this.goalSelector.add(5, new WaterAvoidingRandomWalkingGoal(this, 1.0D));
+        this.goalSelector.add(6, new AnimalMateGoal(this, 1.0D));
     }
 
     @Override
-    public void readAdditionalSaveData(CompoundNBT compoundNBT) {
-        super.readAdditionalSaveData(compoundNBT);
+    public void readCustomDataFromNbt(NbtCompound compoundNBT) {
+        super.readCustomDataFromNbt(compoundNBT);
 
-        this.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.entityData.get(STRENGTH));
+        this.getAttributeInstance(EntityAttributes.GENERIC_ATTACK_DAMAGE).setBaseValue(this.dataTracker.get(STRENGTH));
     }
 }

@@ -1,16 +1,16 @@
 package crimsonfluff.crimsonchickens.entity;
 
-import net.minecraft.entity.CreatureEntity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.MeleeAttackGoal;
+import net.minecraft.entity.mob.PathAwareEntity;
 
 public class AngryChickenGoal extends MeleeAttackGoal {
-    public AngryChickenGoal(CreatureEntity creature, double speedIn, boolean useLongMemory) {
+    public AngryChickenGoal(PathAwareEntity creature, double speedIn, boolean useLongMemory) {
         super(creature, speedIn, useLongMemory);
     }
 
     @Override
-    protected double getAttackReachSqr(LivingEntity entity) {
-        return super.getAttackReachSqr(entity) * 0.8f;
+    protected double getSquaredMaxAttackDistance(LivingEntity entity) {
+        return super.getSquaredMaxAttackDistance(entity) * 0.8f;
     }
 }

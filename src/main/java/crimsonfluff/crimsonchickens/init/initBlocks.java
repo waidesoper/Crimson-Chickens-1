@@ -4,30 +4,30 @@ import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.blocks.Nest;
 import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.block.material.Material;
-import net.minecraft.block.material.MaterialColor;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.block.MapColor;
+import net.minecraft.block.Material;
+import net.minecraft.sound.BlockSoundGroup;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class initBlocks {
-    public static final DeferredRegister<Block> BLOCKS = DeferredRegister.create(ForgeRegistries.BLOCKS, CrimsonChickens.MOD_ID);
+    public static final Block NEST_BLOCK = new Nest();
+    public static final Block EGG_BLOCK = new Block(AbstractBlock.Settings.of(Material.EGG, MapColor.LIGHT_GRAY)
+        .requiresTool()
+        .strength(0.5f)
+        .sounds(BlockSoundGroup.CROP)
+    );
+    public static final Block DUCK_EGG_BLOCK = new Block(AbstractBlock.Settings.of(Material.EGG, MapColor.LIGHT_GRAY)
+        .requiresTool()
+        .strength(0.5f)
+        .sounds(BlockSoundGroup.CROP)
+    );
 
-    public static final RegistryObject<Block> NEST_BLOCK = BLOCKS.register("nest", Nest::new);
+    public static void register() {
+        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "nest"), NEST_BLOCK);
 
-    public static final RegistryObject<Block> DUCK_EGG_BLOCK = BLOCKS.register("duck_egg_block", ()->
-        new Block(AbstractBlock.Properties.of(Material.EGG, MaterialColor.COLOR_LIGHT_GRAY)
-            .requiresCorrectToolForDrops()
-            .strength(0.5f)
-            .sound(SoundType.CROP)
-            .harvestTool(ToolType.AXE)));
-
-    public static final RegistryObject<Block> EGG_BLOCK = BLOCKS.register("egg_block", ()->
-        new Block(AbstractBlock.Properties.of(Material.EGG, MaterialColor.COLOR_YELLOW)
-            .requiresCorrectToolForDrops()
-            .strength(0.5f)
-            .sound(SoundType.CROP)
-            .harvestTool(ToolType.AXE)));
+        // TODO set harvest tool (AXE)
+        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "duck_egg_block"), EGG_BLOCK);
+        Registry.register(Registry.BLOCK, new Identifier(CrimsonChickens.MOD_ID, "egg_block"), DUCK_EGG_BLOCK);
+    }
 }

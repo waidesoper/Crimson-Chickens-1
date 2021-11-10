@@ -1,5 +1,5 @@
 {
-  "itemGroup.crimsonchickens": "Crimson's Chicken Resources",
+  "itemGroup.crimsonchickens": "Crimson's Resource Chickens",
 
   "entity.crimsonchickens.duck_egg": "Duck Egg",
   
@@ -37,5 +37,8 @@
   "subtitle.crimsonchickens.duck_ambient": "Duck quacks",
   "subtitle.crimsonchickens.duck_hurt": "Duck hurt",
   "subtitle.crimsonchickens.duck_death": "Duck dies",
-  "subtitle.crimsonchickens.radiation": "Chicken radiation"
+  "subtitle.crimsonchickens.radiation": "Chicken radiation",
+
+  "gui.crimsonchickens.jei.category.breeding": "Chicken Breeding",
+  "gui.crimsonchickens.jei.category.drops": "Chicken Drops"
 }

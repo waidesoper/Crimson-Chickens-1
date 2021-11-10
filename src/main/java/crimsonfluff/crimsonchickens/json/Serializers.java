@@ -3,7 +3,7 @@ package crimsonfluff.crimsonchickens.json;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.StringNbtReader;
 
 import java.lang.reflect.Type;
 
@@ -35,7 +35,7 @@ public class Serializers {
             String st = obj.get("dropItemNBT").getAsString();
             if (st.length() != 0) {
                 try {
-                    mt.dropItemNBT = new JsonToNBT(new StringReader(st)).readStruct();
+                    mt.dropItemNBT = new StringNbtReader(new StringReader(st)).parseCompound();
                 } catch (CommandSyntaxException e) {
                     e.printStackTrace();
                 }
@@ -101,6 +101,6 @@ public class Serializers {
         }
 
         @Override
-        public Type getType() { return ResourceChickenData.class; }
+        public Type getType() {return ResourceChickenData.class;}
     };
 }

@@ -13,7 +13,8 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
-import net.minecraft.util.*;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceContext;
@@ -37,20 +38,20 @@ public class LiquidEgg extends EggItem {
         FluidHandlerItemStack fluidHandlerItemStack = new FluidHandlerItemStack(stack, 1000) {
             @Nonnull
             @Override
-            public ItemStack getContainer() { return ItemStack.EMPTY; }
+            public ItemStack getContainer() {return ItemStack.EMPTY;}
 
             @Nonnull
             @Override
-            public FluidStack getFluid() { return new FluidStack(fluidType,1000); }
+            public FluidStack getFluid() {return new FluidStack(fluidType, 1000);}
 
             @Override
-            public int getTanks() { return 1; }
+            public int getTanks() {return 1;}
 
             @Override
-            public boolean isFluidValid(int tank, @Nonnull FluidStack stack) { return false; }
+            public boolean isFluidValid(int tank, @Nonnull FluidStack stack) {return false;}
 
             @Override
-            public boolean canFillFluidType(FluidStack fluid) { return false; }
+            public boolean canFillFluidType(FluidStack fluid) {return false;}
 
             @Nonnull
             @Override
@@ -80,10 +81,12 @@ public class LiquidEgg extends EggItem {
         if (rayTraceResult.getType() == RayTraceResult.Type.MISS) {
             return ActionResult.pass(itemStack);
 
-        } else if (rayTraceResult.getType() != RayTraceResult.Type.BLOCK) {
+        }
+        else if (rayTraceResult.getType() != RayTraceResult.Type.BLOCK) {
             return ActionResult.pass(itemStack);
 
-        } else {
+        }
+        else {
             BlockPos blockPos = rayTraceResult.getBlockPos();
             Direction direction = rayTraceResult.getDirection();
             BlockPos blockPos1 = blockPos.relative(direction);
@@ -94,9 +97,9 @@ public class LiquidEgg extends EggItem {
             if (worldIn.dimensionType().ultraWarm() && this.fluidType.is(FluidTags.WATER)) {
                 worldIn.playSound(playerIn, blockPos2, SoundEvents.FIRE_EXTINGUISH, SoundCategory.BLOCKS, 0.5F, 2.6F + (worldIn.random.nextFloat() - worldIn.random.nextFloat()) * 0.8F);
 
-                for (int a = 0; a < 8; ++a) {
+                for (int a = 0; a < 8; ++ a) {
                     worldIn.addParticle(ParticleTypes.LARGE_SMOKE,
-            (double) blockPos2.getX() + Math.random(), (double) blockPos2.getY() + Math.random(), (double) blockPos2.getZ() + Math.random(), 0.0D, 0.0D, 0.0D);
+                        (double) blockPos2.getX() + Math.random(), (double) blockPos2.getY() + Math.random(), (double) blockPos2.getZ() + Math.random(), 0.0D, 0.0D, 0.0D);
                 }
 
                 if (! playerIn.abilities.instabuild) itemStack.shrink(1);
@@ -104,7 +107,8 @@ public class LiquidEgg extends EggItem {
                 playerIn.awardStat(Stats.ITEM_USED.get(this));
                 return ActionResult.sidedSuccess(itemStack, worldIn.isClientSide());
 
-            } else if (worldIn.setBlockAndUpdate(blockPos2, fluidType.defaultFluidState().createLegacyBlock())) {
+            }
+            else if (worldIn.setBlockAndUpdate(blockPos2, fluidType.defaultFluidState().createLegacyBlock())) {
                 if (playerIn instanceof ServerPlayerEntity)
                     CriteriaTriggers.PLACED_BLOCK.trigger((ServerPlayerEntity) playerIn, blockPos2, itemStack);
 
@@ -126,7 +130,7 @@ public class LiquidEgg extends EggItem {
     protected void playEmptySound(@Nullable PlayerEntity p_203791_1_, IWorld p_203791_2_, BlockPos p_203791_3_) {
         SoundEvent emptySound = this.fluidType.getAttributes().getEmptySound();
 
-        if(emptySound == null) emptySound = this.fluidType.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
+        if (emptySound == null) emptySound = this.fluidType.is(FluidTags.LAVA) ? SoundEvents.BUCKET_EMPTY_LAVA : SoundEvents.BUCKET_EMPTY;
         p_203791_2_.playSound(p_203791_1_, p_203791_3_, emptySound, SoundCategory.BLOCKS, 1.0F, 1.0F);
     }
 }

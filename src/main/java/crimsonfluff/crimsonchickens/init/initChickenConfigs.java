@@ -6,8 +6,8 @@ import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.json.Serializers;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import crimsonfluff.crimsonchickens.registry.RegistryHandler;
-import net.minecraftforge.fml.ModList;
-import net.minecraftforge.fml.loading.FMLPaths;
+import net.fabricmc.loader.api.FabricLoader;
+import net.minecraft.util.Identifier;
 import org.apache.commons.io.filefilter.FileFilterUtils;
 
 import java.io.File;
@@ -18,10 +18,11 @@ import java.nio.file.*;
 import java.util.stream.Stream;
 
 public class initChickenConfigs {
-    private static final Path MOD_ROOT = ModList.get().getModFileById(CrimsonChickens.MOD_ID).getFile().getFilePath();
+    private static final Path MOD_ROOT = FabricLoader.getInstance().getConfigDir();
 
     public static void loadConfigs() {
-        File dir = FMLPaths.CONFIGDIR.get().resolve(CrimsonChickens.MOD_ID).toFile();
+//        File dir = FMLPaths.CONFIGDIR.get().resolve(CrimsonChickens.MOD_ID).toFile();
+        File dir = FabricLoader.getInstance().getConfigDir().toFile();
 
         // copy configs from 'data/crimsonchickens'
         // only set up defaults if 'config/crimsonchickens' folder does not exist
@@ -32,11 +33,14 @@ public class initChickenConfigs {
             }
         }
 
-        loadChickenConfigs(Paths.get(dir.toString(),"vanilla"));
-        loadChickenConfigs(Paths.get(dir.toString(),"modded"));
+        loadChickenConfigs(dir.toString(), "vanilla");
+        loadChickenConfigs(dir.toString(), "modded");
+        loadChickenConfigs(dir.toString(), "custom");
     }
 
-    private static void loadChickenConfigs(Path path) {
+    private static void loadChickenConfigs(String root, String folder) {
+        Path path = Paths.get(root, folder);
+
         File[] files = path.toFile().listFiles((FileFilter) FileFilterUtils.suffixFileFilter(".json"));
         if (files == null) return;
 
@@ -54,6 +58,8 @@ public class initChickenConfigs {
                     chickenData.name = name;
                     ChickenRegistry.getRegistry().registerChicken(name, chickenData);
                     RegistryHandler.registerChicken(name, chickenData);
+
+                    chickenData.chickenTexture = new Identifier("crimsonchickens:textures/entity/" + folder + "/" + name + ".png");
                 }
 
             } catch (Exception e) {
@@ -66,6 +72,8 @@ public class initChickenConfigs {
         if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
 
         if (Files.isRegularFile(MOD_ROOT)) {
+            // started getting ambiguous filesystem, so cast to `(ClassLoader) null` seems to fix it?
+            // https://bugs.openjdk.java.net/browse/JDK-8223197
             try (FileSystem fileSystem = FileSystems.newFileSystem(MOD_ROOT, null)) {
                 Path path = fileSystem.getPath(dataPath);
 //                if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
@@ -79,7 +87,7 @@ public class initChickenConfigs {
             }
         }
         else if (Files.isDirectory(MOD_ROOT)) {
-  //          if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
+            //          if (! Files.exists(targetPath)) targetPath.toFile().mkdir();
 
             copyFiles(Paths.get(MOD_ROOT.toString(), dataPath), targetPath);
         }

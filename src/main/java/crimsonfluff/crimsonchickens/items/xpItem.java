@@ -1,59 +1,59 @@
 package crimsonfluff.crimsonchickens.items;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
-import crimsonfluff.crimsonchickens.init.initItems;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.Rarity;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.ActionResult;
+import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
-import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.Rarity;
+import net.minecraft.util.TypedActionResult;
+import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class xpItem extends Item {
-    public xpItem() { super(new Properties().tab(CrimsonChickens.TAB).rarity(Rarity.UNCOMMON)); }
+    public xpItem() {super(new FabricItemSettings().group(CrimsonChickens.CRIMSON_CHICKENS_TAB).rarity(Rarity.UNCOMMON));}
 
     @Override
-    public boolean isFoil(ItemStack itemStack) { return true; }
+    public boolean hasGlint(ItemStack itemStack) {return true;}
 
     @Override
-    public ActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
-        if (worldIn.isClientSide) return ActionResult.success(playerIn.getItemInHand(handIn));
-        playerIn.level.playSound(null, playerIn.blockPosition(), SoundEvents.EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1f, 1f);
+    public TypedActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
+        if (worldIn.isClient) return TypedActionResult.success(playerIn.getStackInHand(handIn));
+        playerIn.world.playSound(null, playerIn.getBlockPos(), SoundEvents.ENTITY_EXPERIENCE_ORB_PICKUP, SoundCategory.PLAYERS, 1f, 1f);
 
         int isAmount = 0;
         ItemStack stack;
 
-        Vector3d vec = playerIn.position().add(playerIn.getLookAngle().multiply(2, 0, 2));
-        ((ServerWorld) worldIn).sendParticles(new ItemParticleData(ParticleTypes.ITEM, new ItemStack(initItems.XP_ITEM.get())),
-            vec.x, playerIn.getEyeY(), vec.z, 20, 0.5f, 0.5f, 0.5f,0);
+        Vec3d vec = playerIn.getPos().add(playerIn.getLookAngle().multiply(2, 0, 2));
+        ((ServerWorld) worldIn).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.XP_ITEM.get())),
+            vec.x, playerIn.getEyeY(), vec.z, 20, 0.5f, 0.5f, 0.5f, 0);
 
-        if (playerIn.isShiftKeyDown()) {
-            for (int a = 0; a < playerIn.inventory.items.size(); a++) {
-                stack = playerIn.inventory.getItem(a);
+        if (playerIn.isSneaking()) {
+            for (int a = 0; a < playerIn.inventory.size(); a++) {
+                stack = playerIn.inventory.getStack(a);
 
-                if (stack.getItem() == initItems.XP_ITEM.get()) {
+                if (stack.getItem() == initItems.XP_ITEM) {
                     //isAmount += stack.getCount();
                     isAmount += 3 + worldIn.random.nextInt(5) + worldIn.random.nextInt(5);  // between 3 and 11 xp, same as Bottle O'Enchanting
                     if (! playerIn.isCreative()) stack.setCount(0);
                 }
             }
-
-        } else {
-            stack = playerIn.getItemInHand(handIn);
+        }
+        else {
+            stack = playerIn.getStackInHand(handIn);
             isAmount += 3 + worldIn.random.nextInt(5) + worldIn.random.nextInt(5);
 
             if (! playerIn.isCreative()) stack.setCount(0);
         }
 
-        playerIn.giveExperiencePoints(isAmount);
+        playerIn.addExperience(isAmount);
 
-        return ActionResult.success(playerIn.getItemInHand(handIn));
+        return TypedActionResult.success(playerIn.getStackInHand(handIn));
     }
 }

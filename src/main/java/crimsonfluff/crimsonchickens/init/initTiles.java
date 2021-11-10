@@ -1,15 +1,19 @@
 package crimsonfluff.crimsonchickens.init;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
+import crimsonfluff.crimsonchickens.blocks.Nest;
 import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.block.Block;
+import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityType;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class initTiles {
-    public static final DeferredRegister<TileEntityType<?>> TILES = DeferredRegister.create(ForgeRegistries.TILE_ENTITIES, CrimsonChickens.MOD_ID);
 
-    public static final RegistryObject<TileEntityType<NestTileEntity>> NEST_BLOCK_TILE = TILES.register(
-        "nest_block_tile", () -> TileEntityType.Builder.of(NestTileEntity::new, initBlocks.NEST_BLOCK.get()).build(null));
+    public static BlockEntityType<NestTileEntity> NEST_BLOCK_TILE;
+
+    public static void register() {
+        NEST_BLOCK_TILE = Registry.register(Registry.BLOCK_ENTITY_TYPE, new Identifier(CrimsonChickens.MOD_ID, "nest"), BlockEntityType.Builder.create(NestTileEntity::new, initBlocks.NEST_BLOCK).build(null));
+    }
 }

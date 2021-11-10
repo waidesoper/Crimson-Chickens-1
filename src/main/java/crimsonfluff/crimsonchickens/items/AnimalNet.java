@@ -8,69 +8,65 @@ import crimsonfluff.crimsonchickens.init.initItems;
 import crimsonfluff.crimsonchickens.init.initSounds;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import net.minecraft.client.util.ITooltipFlag;
+import net.fabricmc.fabric.api.item.v1.FabricItemSettings;
+import net.minecraft.client.item.TooltipContext;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EquipmentSlot;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.mob.HostileEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.ItemUseContext;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.*;
+import net.minecraft.item.ItemUsageContext;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.particle.ItemStackParticleEffect;
+import net.minecraft.particle.ParticleTypes;
+import net.minecraft.server.world.ServerWorld;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvents;
+import net.minecraft.text.Text;
+import net.minecraft.text.TranslatableText;
+import net.minecraft.util.ActionResult;
+import net.minecraft.util.Formatting;
+import net.minecraft.util.Hand;
+import net.minecraft.util.Identifier;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.registries.ForgeRegistries;
+import org.jetbrains.annotations.Nullable;
 
-import javax.annotation.Nullable;
 import java.util.List;
 
 public class AnimalNet extends Item {
     public AnimalNet() {
-        super(new Properties().tab(CrimsonChickens.TAB).durability(16));
+        super(new FabricItemSettings().group(CrimsonChickens.CRIMSON_CHICKENS_TAB).maxDamage(16));
     }
 
     @Override
-    public ActionResultType interactLivingEntity(ItemStack itemStack, PlayerEntity playerIn, LivingEntity entityIn, Hand handIn) {
-        if (playerIn.level.isClientSide) return ActionResultType.PASS;
-
-// this is not needed because AnimalNet has durability, so no need to split stack
-// would be nice to set max_durability. carry stack of 8 nets then split them when used??
-
-//        ItemStack newStack;
-//        if (itemStack.getCount() > 1) {
-//            if (! playerIn.abilities.instabuild) itemStack.shrink(1);
-//            newStack = new ItemStack(initItems.ANIMAL_NET.get());
-//
-//            if (! playerIn.inventory.add(newStack)) playerIn.drop(newStack, false);
-//
-//        } else
-//            newStack = itemStack;
+    public ActionResult useOnEntity(ItemStack itemStack, PlayerEntity playerIn, LivingEntity entityIn, Hand handIn) {
+        if (playerIn.world.isClient) return ActionResult.PASS;
 
         // config.SpawnType=1 would mean Resource Chicken would be MONSTER classification
         ResourceChickenData chickenData = null;
         if (entityIn instanceof ResourceChickenEntity) {
             chickenData = ((ResourceChickenEntity) entityIn).chickenData;
-            if (chickenData.name.equals("grave")) return ActionResultType.FAIL;     // can't pick up grave chicken
 
-        } else {
-            if (entityIn.getClassification(false) == EntityClassification.MONSTER) return ActionResultType.FAIL;
-            if (entityIn instanceof PlayerEntity) return ActionResultType.FAIL;
+            if (chickenData.name.equals("grave")) return ActionResult.FAIL;     // can't pick up grave chicken
+            if (chickenData.name.equals("angry")) return ActionResult.FAIL;     // can't pick up angry chicken
+
+        }
+        else {
+            // TODO: getClassification()
+            if (entityIn instanceof HostileEntity) return ActionResult.FAIL;
+            if (entityIn instanceof PlayerEntity) return ActionResult.FAIL;
         }
 
-        // checks for ClientSide and isDamageable and Creative
-        itemStack.hurtAndBreak(1, playerIn, (player)-> { player.broadcastBreakEvent(handIn); });
-        if (itemStack.isEmpty()) return ActionResultType.FAIL;
+        // Moved damage to when releasing chicken, to avoid 1 durability break when picking up chicken
 
-        CompoundNBT compoundStack = itemStack.getOrCreateTag();
-        CompoundNBT compound = new CompoundNBT();
-        entityIn.save(compound);
+        NbtCompound compoundStack = itemStack.getOrCreateTag();
+        NbtCompound compound = new NbtCompound();
+        entityIn.saveNbt(compound);
 
         // strip out nonsense, not used for our purposes, efficiency, memory etc
         compound.remove("UUID");
@@ -83,110 +79,129 @@ public class AnimalNet extends Item {
         if (entityIn instanceof ResourceChickenEntity)
             compoundStack.putString("entityDescription", chickenData.displayName);
         else
-            compoundStack.putString("entityDescription", entityIn.getType().getDescriptionId());
+            compoundStack.putString("entityDescription", entityIn.getType().getTranslationKey());
 
-        playerIn.sweepAttack();
-        playerIn.level.playSound(null, playerIn.blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
+        // TODO: sweepAttack()
+        playerIn.spawnSweepAttackParticles();
+        playerIn.world.playSound(null, playerIn.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
 
         entityIn.remove();
-        return ActionResultType.SUCCESS;
+        return ActionResult.SUCCESS;
     }
 
     @Override
-    public ActionResultType useOn(ItemUseContext context) {
-        if (context.getPlayer() == null) return super.useOn(context);       // in case a mob can use items?
-        if (context.getPlayer().level.isClientSide) return super.useOn(context);
+    public ActionResult useOnBlock(ItemUsageContext context) {
+        if (context.getPlayer() == null) return super.useOnBlock(context);       // in case a mob can use items?
+        if (context.getPlayer().world.isClient) return super.useOnBlock(context);
 
-        CompoundNBT compound = context.getItemInHand().getTagElement("entityCaptured");
+        NbtCompound compound = context.getStack().getSubTag("entityCaptured");
 
-        if (context.getLevel().getBlockState(context.getClickedPos()).getBlock() == initBlocks.NEST_BLOCK.get()) {
-            NestTileEntity te = (NestTileEntity) context.getLevel().getBlockEntity(context.getClickedPos());
-            if (te == null) return ActionResultType.FAIL;
+        if (context.getWorld().getBlockState(context.getBlockPos()).getBlock() == initBlocks.NEST_BLOCK) {
+            NestTileEntity te = (NestTileEntity) context.getWorld().getBlockEntity(context.getBlockPos());
+            if (te == null) return ActionResult.FAIL;
 
             if (te.entityCaptured != null && compound == null) {
                 // extract chicken from nest
                 //context.getPlayer().displayClientMessage(new StringTextComponent("remove the chicken"), false);
 
-                context.getItemInHand().getOrCreateTag().putInt("CustomModelData", 1);        // used to change item texture
+                context.getStack().getOrCreateTag().putInt("CustomModelData", 1);        // used to change item texture
                 te.entityCaptured.putInt("EggLayTime", te.eggLayTime);                                  // update egg lay time
-                context.getItemInHand().getOrCreateTag().put("entityCaptured", te.entityCaptured);
-                context.getItemInHand().getOrCreateTag().putString("entityDescription", te.entityDescription);
+                context.getStack().getOrCreateTag().put("entityCaptured", te.entityCaptured);
+                context.getStack().getOrCreateTag().putString("entityDescription", te.entityDescription);
 
                 te.entityRemove(true);
 
-                context.getLevel().playSound(null, context.getPlayer().blockPosition(), SoundEvents.PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
-                context.getPlayer().sweepAttack();
+                // TODO: sweepAttack()
+                context.getPlayer().spawnSweepAttackParticles();
+                context.getWorld().playSound(null, context.getPlayer().getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
 
-                // checks for ClientSide and isDamageable and Creative
-                context.getItemInHand().hurtAndBreak(1, context.getPlayer(), player -> {
-                    player.broadcastBreakEvent(context.getHand());
-                });
-
-            } else if (te.entityCaptured == null && compound != null) {
+            }
+            else if (te.entityCaptured == null && compound != null) {
                 //insert chicken into nest
                 //context.getPlayer().displayClientMessage(new StringTextComponent("insert the chicken"), false);
 
-                te.entitySet(compound, context.getItemInHand().getOrCreateTag().getString("entityDescription"), true);
+                // Make sure it's a chicken.  Sheep dont like the stasis chamber
+                String s = compound.getString("id");
+                if (s.startsWith("crimsonchickens:")) {
+                    te.entitySet(compound, context.getStack().getOrCreateTag().getString("entityDescription"), true);
 
-                ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(compound.getString("id"));
-                context.getLevel().playSound(null, context.getPlayer().blockPosition(),
-                    context.getLevel().random.nextInt(2) == 0
-                        ? SoundEvents.CHICKEN_EGG
-                        : chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT.get() : SoundEvents.CHICKEN_AMBIENT
-                , SoundCategory.PLAYERS, 1f, 1f);
+                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(s);
+                    context.getWorld().playSound(null, context.getPlayer().getBlockPos(),
+                        context.getWorld().random.nextInt(2) == 0
+                            ? SoundEvents.ENTITY_CHICKEN_EGG
+                            : chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT : SoundEvents.ENTITY_CHICKEN_AMBIENT
+                        , SoundCategory.PLAYERS, 1f, 1f);
 
-                context.getItemInHand().removeTagKey("entityCaptured");
-                context.getItemInHand().removeTagKey("entityDescription");
-                context.getItemInHand().removeTagKey("CustomModelData");        // used to change item texture
+                    context.getStack().removeSubTag("entityCaptured");
+                    context.getStack().removeSubTag("entityDescription");
+                    context.getStack().removeSubTag("CustomModelData");        // used to change item texture
 
-            } else
-                return ActionResultType.CONSUME;       // stops the arm swing animation ?
+                    // checks for ClientSide and isDamageable and Creative
+                    // TODO: re-check Hand
+                    context.getStack().damage(1, context.getPlayer(), plyr -> plyr.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
 
-            ((ServerWorld) context.getLevel()).sendParticles(new ItemParticleData(ParticleTypes.ITEM, new ItemStack(initItems.NEST_BLOCK_ITEM.get())),
-                context.getClickedPos().getX() + 0.5, context.getClickedPos().getY() + 0.2, context.getClickedPos().getZ() + 0.5,
-                20, 0.3, 0.2, 0.3,0);
+                }
+                else
+                    return ActionResult.CONSUME;       // stops the arm swing animation ?
 
-            return ActionResultType.SUCCESS;
+            }
+            else
+                return ActionResult.CONSUME;       // stops the arm swing animation ?
+
+            ((ServerWorld) context.getWorld()).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.NEST_BLOCK_ITEM)),
+                context.getBlockPos().getX() + 0.5, context.getBlockPos().getY() + 0.2, context.getBlockPos().getZ() + 0.5,
+                20, 0.3, 0.2, 0.3, 0);
+
+            return ActionResult.SUCCESS;
         }
 
-        if (compound == null) return ActionResultType.FAIL;
+        if (compound == null) return ActionResult.FAIL;
 
-        Entity entity = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(compound.getString("id"))).create(context.getLevel());
+//        Entity entity = ForgeRegistries.ENTITIES.getValue(new Identifier(compound.getString("id"))).create(context.getWorld());
+        Entity entity = Registry.ENTITY_TYPE.get(new Identifier(compound.getString("id"))).create(context.getWorld());
+
         if (entity != null) {
-            BlockPos pos = context.getClickedPos().offset(context.getClickedFace().getNormal());
-            int yPos = pos.getY(); if (context.getClickedFace() != Direction.UP) yPos += 0.5;
+            BlockPos pos = context.getBlockPos().offset(context.getSide());
+            int yPos = pos.getY();
+            if (context.getSide() != Direction.UP) yPos += 0.5;
 
-            entity.load(compound);
+            entity.readNbt(compound);
             entity.setPos(pos.getX() + 0.5, yPos, pos.getZ() + 0.5);
-            context.getLevel().addFreshEntity(entity);
+            context.getWorld().spawnEntity(entity);
 
-            context.getItemInHand().removeTagKey("entityCaptured");
-            context.getItemInHand().removeTagKey("entityDescription");
-            context.getItemInHand().removeTagKey("CustomModelData");        // used to change item texture
+            context.getStack().removeSubTag("entityCaptured");
+            context.getStack().removeSubTag("entityDescription");
+            context.getStack().removeSubTag("CustomModelData");        // used to change item texture
 
-            context.getLevel().playSound(null, context.getPlayer().blockPosition(), SoundEvents.CHICKEN_EGG, SoundCategory.PLAYERS, 1f, 1f);
+            context.getWorld().playSound(null, context.getPlayer().getBlockPos(), SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 1f, 1f);
 
-            return ActionResultType.SUCCESS;
+            // checks for ClientSide and isDamageable and Creative
+//            context.getItemInHand().hurtAndBreak(1, context.getPlayer(), player -> player.broadcastBreakEvent(context.getHand()));
+            // TODO: re-check Hand
+            context.getStack().damage(1, context.getPlayer(), plyr -> plyr.sendEquipmentBreakStatus(EquipmentSlot.MAINHAND));
 
-        } else
-            return ActionResultType.FAIL;
+            return ActionResult.SUCCESS;
+
+        }
+        else
+            return ActionResult.FAIL;
     }
 
     @Override
-    public void appendHoverText(ItemStack itemStack, @Nullable World worldIn, List<ITextComponent> tooltip, ITooltipFlag tooltipFlag) {
-        super.appendHoverText(itemStack, worldIn, tooltip, tooltipFlag);
+    public void appendTooltip(ItemStack itemStack, @Nullable World worldIn, List<Text> tooltip, TooltipContext context) {
+        super.appendTooltip(itemStack, worldIn, tooltip, context);
 
-        CompoundNBT compound = itemStack.getTagElement("entityCaptured");
+        NbtCompound compound = itemStack.getSubTag("entityCaptured");
         if (compound != null) {
-            tooltip.add(new TranslationTextComponent(itemStack.getOrCreateTag().getString("entityDescription")));
+            tooltip.add(new TranslatableText(itemStack.getOrCreateTag().getString("entityDescription")));
 
             if (compound.contains("CustomName", 8))
-                tooltip.add(ITextComponent.Serializer.fromJson(compound.getString("CustomName")).withStyle(TextFormatting.ITALIC));
+                tooltip.add(Text.Serializer.fromJson(compound.getString("CustomName")).formatted(Formatting.ITALIC));
 
             if (compound.getBoolean("analyzed")) {
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.growth", compound.getInt("growth")).withStyle(TextFormatting.GRAY));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.gain", compound.getInt("gain")).withStyle(TextFormatting.GRAY));
-                tooltip.add(new TranslationTextComponent("tip.crimsonchickens.strength", compound.getInt("strength")).withStyle(TextFormatting.GRAY));
+                tooltip.add(new TranslatableText("tip.crimsonchickens.growth", compound.getInt("growth")).formatted(Formatting.GRAY));
+                tooltip.add(new TranslatableText("tip.crimsonchickens.gain", compound.getInt("gain")).formatted(Formatting.GRAY));
+                tooltip.add(new TranslatableText("tip.crimsonchickens.strength", compound.getInt("strength")).formatted(Formatting.GRAY));
             }
         }
     }

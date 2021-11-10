@@ -1,15 +1,15 @@
 {
   "homepage": "https://www.curseforge.com/minecraft/mc-mods/crimson-chickens",
   "promos": {
-    "1.16.5-latest": "1.0.5",
-    "1.16.5-recommended": "1.0.5"
+    "1.16.5-latest": "1.0.0",
+    "1.16.5-recommended": "1.0.0",
+    "1.17.1-latest": "1.0.0",
+    "1.17.1-recommended": "1.0.0"
   },
   "1.16.5": {
-    "1.0.0": "Initial Release. Official Mappings. Forge 36.2.2",
-    "1.0.1": "Configs fix",
-    "1.0.2": "Code Cleanup. Fixed Liquid Eggs. Fixed Nether Spawns ? Modded Chickens. Translations, Better Tooltips",
-    "1.0.3": "Fixed NPE. Stasis Baby Growth",
-    "1.0.4": "Better WAILA/JADE support",
-    "1.0.5": "Conversion in TOP/WAILA/JADE. Config Conversions now 250. Corrected minecraft:gunpowder. Water/Lava eggs now fill tanks"
+    "1.0.0": "Fabric 1.16.5, v0.12.3"
+  },
+  "1.17.1": {
+    "1.0.0": "Fabric 1.17.1, v0.12.5"
   }
 }

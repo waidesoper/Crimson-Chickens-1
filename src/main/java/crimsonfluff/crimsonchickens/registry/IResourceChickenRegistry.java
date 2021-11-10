@@ -17,7 +17,7 @@ public interface IResourceChickenRegistry {
      * Returns an unmodifiable copy of the Chicken Registry.
      * This is useful for iterating over all chickens without worry of changing data
      *
-     *  @return Returns unmodifiable copy of chicken registry.
+     * @return Returns unmodifiable copy of chicken registry.
      */
     Map<String, ResourceChickenData> getChickens();
 }

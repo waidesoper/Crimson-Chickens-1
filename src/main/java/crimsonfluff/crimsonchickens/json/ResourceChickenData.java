@@ -2,8 +2,8 @@ package crimsonfluff.crimsonchickens.json;
 
 import com.google.gson.JsonArray;
 import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.NbtCompound;
+import net.minecraft.util.Identifier;
 import net.minecraftforge.fml.RegistryObject;
 
 public class ResourceChickenData {
@@ -25,10 +25,10 @@ public class ResourceChickenData {
     // 6= glass sounds, 7= ghast sounds, 8= bone sounds
     public int hasTrait = 0;
 
-    public CompoundNBT dropItemNBT = null;      // cache the actual NBT
-//    public Item dropItemItem = null;            // cache the actual item
+    public NbtCompound dropItemNBT = null;      // cache the actual NBT
+    //    public Item dropItemItem = null;            // cache the actual item
     public String dropItemItem = "";            // cant cache because FMLCommonSetUp is too late to register chickens
-                                                // and modded items may not exist yet
+    // and modded items may not exist yet
 
     public JsonArray biomesWhitelist = null;
     public JsonArray biomesBlacklist = null;
@@ -45,15 +45,16 @@ public class ResourceChickenData {
 
     public boolean enabled = false;
 
+    public Identifier chickenTexture = null;
 
     private transient RegistryObject<Item> spawnEggItemRegistryObject;
-    private transient ResourceLocation entityTypeRegistryID;
+    private transient Identifier entityTypeRegistryID;
 
-    public ResourceLocation getEntityTypeRegistryID() {
+    public Identifier getEntityTypeRegistryID() {
         return entityTypeRegistryID;
     }
 
-    public void setEntityTypeRegistryID(ResourceLocation entityTypeRegistryID) {
+    public void setEntityTypeRegistryID(Identifier entityTypeRegistryID) {
         this.entityTypeRegistryID = this.entityTypeRegistryID == null ? entityTypeRegistryID : this.entityTypeRegistryID;
     }
 

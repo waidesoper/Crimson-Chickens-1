@@ -5,14 +5,13 @@ import crimsonfluff.crimsonchickens.entity.AngryChickenEntity;
 import crimsonfluff.crimsonchickens.entity.DuckEggProjectileEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.initEntities;
-import crimsonfluff.crimsonchickens.init.initItems;
 import crimsonfluff.crimsonchickens.items.SupplierSpawnEggItem;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.item.Item;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Identifier;
 import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.fml.RegistryObject;
@@ -27,7 +26,7 @@ public class RegistryHandler {
             .sized(0.25F, 0.25F)
             .clientTrackingRange(4)
             .updateInterval(10)
-            .build(new ResourceLocation(CrimsonChickens.MOD_ID, "duck_egg").toString()));
+            .build(new Identifier(CrimsonChickens.MOD_ID, "duck_egg").toString()));
 
 
     public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
@@ -51,7 +50,8 @@ public class RegistryHandler {
                 .fireImmune()
                 .build(name + "_chicken"));
 
-        } else {
+        }
+        else {
 
             if (chickenData.isFireImmune) {
                 customChickenEntity = ENTITY_TYPES.register(name + "_chicken", () -> EntityType.Builder

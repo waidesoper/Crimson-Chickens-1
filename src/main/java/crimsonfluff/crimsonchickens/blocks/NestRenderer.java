@@ -12,9 +12,13 @@ import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.tileentity.TileEntityRenderer;
 import net.minecraft.client.renderer.tileentity.TileEntityRendererDispatcher;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.passive.ChickenEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.text.Text;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.Direction;
+import net.minecraft.util.math.Quaternion;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
@@ -39,7 +43,7 @@ public class NestRenderer extends TileEntityRenderer<NestTileEntity> {
         if (tileEntity.entityCaptured != null) {
             Direction direction = tileEntity.getBlockState().getValue(Nest.FACING);
 
-            RenderType renderType = chickenModel.renderType(tileEntity.chickenTexture);
+            RenderType renderType = chickenModel.renderType(tileEntity.chickenData.chickenTexture);
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
 
             chickenModel.young = tileEntity.chickenAge < 0;
@@ -52,47 +56,27 @@ public class NestRenderer extends TileEntityRenderer<NestTileEntity> {
 
             chickenModel.renderToBuffer(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
             vertexBuilder.endVertex();
-
-            // render all but the legs/feet
-            // 1, 1, 1, 1 is the colorf(1,1,1,1)
-//            if (false) {
-//                matrixStack.pushPose();
-//                matrixStack.scale(2f, 2f, 2f);
-//                matrixStack.translate(0f, - 0.5f, 0f);
-//                chickenModel.head.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//                chickenModel.beak.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//                chickenModel.comb.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//                matrixStack.popPose();
-//            }
-//            else {
-//            chickenModel.head.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//            chickenModel.beak.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//            chickenModel.comb.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-////            }
-//            chickenModel.body.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//            chickenModel.wing0.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-//            chickenModel.wing1.render(matrixStack, vertexBuilder, combinedLight, combinedOverlay, 1, 1, 1, 1);
-            //mc.getEntityRenderDispatcher().render(entity, 0.0, 0.0, 0.0, 0, 0, matrixStack, buffer, combinedLight);       // draw the entire chicken model
-
             matrixStack.popPose();
 
             if (CrimsonChickens.CONFIGURATION.renderLabels.get()) {
                 if (tileEntity.entityCustomName != null) {
-                    if (this.renderer.camera.getPosition().distanceToSqr(tileEntity.getBlockPos().getX(), tileEntity.getBlockPos().getY(), tileEntity.getBlockPos().getZ()) < 64)
+                    if (this.renderer.camera.getPosition().distanceToSqr(tileEntity.getPos().getX(), tileEntity.getPos().getY(), tileEntity.getPos().getZ()) < 64)
                         renderLabel(matrixStack, buffer, combinedLight, tileEntity.entityCustomName, 0);
                 }
             }
 
             // render storeItems if any in the nest
             if (CrimsonChickens.CONFIGURATION.renderItems.get()) {
-                if (tileEntity.storedItems.contents().size() != 0) {
-                    IntStream.range(0, tileEntity.storedItems.contents().size()).filter(a -> ! tileEntity.storedItems.getStackInSlot(a).isEmpty()).forEach(a -> renderItem(tileEntity.storedItems.getStackInSlot(a), getTranslation(a), Vector3f.YP.rotationDegrees(180.0F + direction.toYRot()), matrixStack, buffer, combinedOverlay, combinedLight));
+                if (tileEntity.STORED_ITEMS.contents().size() != 0) {
+                    IntStream.range(0, tileEntity.STORED_ITEMS.contents().size())
+                        .filter(a -> ! tileEntity.STORED_ITEMS.getStackInSlot(a).isEmpty())
+                        .forEach(a -> renderItem(tileEntity.STORED_ITEMS.getStackInSlot(a), getTranslation(a, direction), Vector3f.YP.rotationDegrees(180.0F + direction.toYRot()), matrixStack, buffer, combinedOverlay, combinedLight));
                 }
             }
         }
     }
 
-    private void renderLabel(MatrixStack matrixStack, IRenderTypeBuffer buffer, int lightLevel, ITextComponent text, int color) {
+    private void renderLabel(MatrixStack matrixStack, IRenderTypeBuffer buffer, int lightLevel, Text text, int color) {
         matrixStack.pushPose();
         float scale = 0.02f;
         int opacity = (int) (.4f * 255.0F) << 24;
@@ -109,18 +93,56 @@ public class NestRenderer extends TileEntityRenderer<NestTileEntity> {
         matrixStack.popPose();
     }
 
-    private double[] getTranslation(int index) {
-        double a = 0.15;
-
-        switch (index) {
-            case 0:
-                return new double[] {0.75, a, 0.25};
-            case 1:
-                return new double[] {0.75, a, 0.75};
-            case 2:
-                return new double[] {0.25, a, 0.75};
+    private double[] getTranslation(int index, Direction direction) {
+        switch (direction) {
             default:
-                return new double[] {0.25, a, 0.25};
+            case NORTH:
+                switch (index) {
+                    case 0:
+                        return new double[] {0.25, 0.15, 0.25};     //right
+                    case 1:
+                        return new double[] {0.75, 0.15, 0.25};     //left
+                    case 2:
+                        return new double[] {0.75, 0.15, 0.75};     //left behind
+                    default:
+                        return new double[] {0.25, 0.15, 0.75};     //right behind
+                }
+
+            case SOUTH:
+                switch (index) {
+                    case 0:
+                        return new double[] {0.75, 0.15, 0.75};
+                    case 1:
+                        return new double[] {0.25, 0.15, 0.75};
+                    case 2:
+                        return new double[] {0.25, 0.15, 0.25};
+                    default:
+                        return new double[] {0.75, 0.15, 0.25};
+                }
+
+            case WEST:
+                switch (index) {
+                    case 0:
+                        return new double[] {0.25, 0.15, 0.75};
+                    case 1:
+                        return new double[] {0.25, 0.15, 0.25};
+                    case 2:
+                        return new double[] {0.75, 0.15, 0.25};
+                    default:
+                        return new double[] {0.75, 0.15, 0.75};
+                }
+
+            case EAST:
+                switch (index) {
+                    case 0:
+                        return new double[] {0.75, 0.15, 0.25};
+                    case 1:
+                        return new double[] {0.75, 0.15, 0.75};
+                    case 2:
+                        return new double[] {0.25, 0.15, 0.75};
+                    default:
+                        return new double[] {0.25, 0.15, 0.25};
+                }
         }
     }
 
@@ -129,8 +151,8 @@ public class NestRenderer extends TileEntityRenderer<NestTileEntity> {
         matrixStack.translate(translation[0], translation[1], translation[2]);
         matrixStack.mulPose(rotation);
         matrixStack.scale(0.7f, 0.7f, 0.7f);
-        IBakedModel ibakedmodel = mc.getItemRenderer().getModel(stack, null, null);
-        mc.getItemRenderer().render(stack, ItemCameraTransforms.TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, ibakedmodel);
+        IBakedModel iBakedModel = mc.getItemRenderer().getModel(stack, null, null);
+        mc.getItemRenderer().render(stack, ItemCameraTransforms.TransformType.GROUND, true, matrixStack, buffer, lightLevel, combinedOverlay, iBakedModel);
         matrixStack.popPose();
     }
 }

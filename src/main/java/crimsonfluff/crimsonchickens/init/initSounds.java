@@ -1,21 +1,19 @@
 package crimsonfluff.crimsonchickens.init;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.Registry;
 
 public class initSounds {
-        public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, CrimsonChickens.MOD_ID);
+    public static final SoundEvent DUCK_AMBIENT = new SoundEvent(new Identifier(CrimsonChickens.MOD_ID, "duck.ambient"));
+    public static final SoundEvent DUCK_DEATH = new SoundEvent(new Identifier(CrimsonChickens.MOD_ID, "duck.death"));
+    public static final SoundEvent RADIATION = new SoundEvent(new Identifier(CrimsonChickens.MOD_ID, "radiation"));
 
-        public static final RegistryObject<SoundEvent> DUCK_AMBIENT = SOUNDS.register("duck.ambient",
-                () -> new SoundEvent(new ResourceLocation(CrimsonChickens.MOD_ID, "duck.ambient")));
 
-        public static final RegistryObject<SoundEvent> DUCK_DEATH = SOUNDS.register("duck.death",
-                () -> new SoundEvent(new ResourceLocation(CrimsonChickens.MOD_ID, "duck.death")));
-
-        public static final RegistryObject<SoundEvent> RADIATION = SOUNDS.register("radiation",
-                () -> new SoundEvent(new ResourceLocation(CrimsonChickens.MOD_ID, "radiation")));
+    public static void register() {
+        Registry.register(Registry.SOUND_EVENT, DUCK_AMBIENT.getId(), DUCK_AMBIENT);
+        Registry.register(Registry.SOUND_EVENT, DUCK_DEATH.getId(), DUCK_DEATH);
+        Registry.register(Registry.SOUND_EVENT, RADIATION.getId(), RADIATION);
+    }
 }

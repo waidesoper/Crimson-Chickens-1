@@ -19,7 +19,7 @@ public class ChickenRegistry implements IResourceChickenRegistry {
      *
      * @return Instance of this class
      */
-    public static ChickenRegistry getRegistry() { return INSTANCE; }
+    public static ChickenRegistry getRegistry() {return INSTANCE;}
 
 
     /**
@@ -28,7 +28,7 @@ public class ChickenRegistry implements IResourceChickenRegistry {
      * @param name Chicken for which ChickenData is requested.
      * @return Returns a ChickenData object for the given chicken.
      */
-    public ResourceChickenData getChickenData(String name) { return chickenInfo.get(name); }
+    public ResourceChickenData getChickenData(String name) {return chickenInfo.get(name);}
 
     public ResourceChickenData getChickenDataFromID(String name) {
         for (Map.Entry<String, ResourceChickenData> entry : chickenInfo.entrySet()) {
