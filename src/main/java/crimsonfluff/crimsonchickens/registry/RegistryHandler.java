@@ -16,11 +16,16 @@ import net.minecraft.util.registry.Registry;
 public class RegistryHandler {
 //    public static final DeferredRegister<EntityType<?>> ENTITY_TYPES = DeferredRegister.create(ForgeRegistries.ENTITIES, CrimsonChickens.MOD_ID);
 
-    public static final EntityType<DuckEggProjectileEntity> DUCK_EGG = Registry.register(Registry.ENTITY_TYPE,
-    new Identifier(CrimsonChickens.MOD_ID, "duck_egg"),
-        FabricEntityTypeBuilder.<DuckEggProjectileEntity>create(SpawnGroup.MISC, DuckEggProjectileEntity::new)
-        .dimensions(EntityDimensions.fixed(0.4f, 0.7f))
-        .build());
+    public static EntityType<DuckEggProjectileEntity> DUCK_EGG;
+
+    public static void register() {
+        DUCK_EGG = Registry.register(Registry.ENTITY_TYPE,
+            new Identifier(CrimsonChickens.MOD_ID, "duck_egg"),
+            FabricEntityTypeBuilder.<DuckEggProjectileEntity>create(SpawnGroup.MISC, DuckEggProjectileEntity::new)
+                .dimensions(EntityDimensions.fixed(0.4f, 0.7f))
+                .build());
+    }
+
 
 //    public static void onEntityAttributeCreationEvent(EntityAttributeCreationEvent event) {
 //        initEntities.getModChickens().forEach((s, customChicken) -> {

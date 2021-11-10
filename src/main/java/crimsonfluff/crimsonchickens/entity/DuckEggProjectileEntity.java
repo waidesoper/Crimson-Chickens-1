@@ -1,5 +1,8 @@
 package crimsonfluff.crimsonchickens.entity;
 
+import crimsonfluff.crimsonchickens.CrimsonChickens;
+import crimsonfluff.crimsonchickens.client.DuckEggProjectileSpawnPacket;
+import crimsonfluff.crimsonchickens.client.clientStuff;
 import crimsonfluff.crimsonchickens.init.initEntities;
 import crimsonfluff.crimsonchickens.init.initItems;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
@@ -89,11 +92,7 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
     protected Item getDefaultItem() {return initItems.EGG_DUCK;}
 
     @Override
-    public Packet<?> createSpawnPacket() {
-        return super.createSpawnPacket();
+    public Packet createSpawnPacket() {
+        return DuckEggProjectileSpawnPacket.create(this, clientStuff.PacketID);
     }
-
-    // or it will not render !
-//    @Override
-//    public IPacket<?> getAddEntityPacket() {return NetworkHooks.getEntitySpawningPacket(this);}
 }

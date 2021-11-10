@@ -2,6 +2,7 @@ package crimsonfluff.crimsonchickens;
 
 import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
+import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.minecraft.block.Blocks;
@@ -23,7 +24,7 @@ public class CrimsonChickens implements ModInitializer {
 
 //    public static CrimsonChickensConfig CONFIG;
 
-    public static final ItemGroup CRIMSON_CHICKENS_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "stuff"), () -> new ItemStack(Blocks.COBBLESTONE));
+    public static final ItemGroup CRIMSON_CHICKENS_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "stuff"), () -> new ItemStack(initItems.EGG_DUCK));
 
 
     @Override
@@ -36,6 +37,7 @@ public class CrimsonChickens implements ModInitializer {
         initBlocks.register();
         initTiles.register();
         initSounds.register();
+        RegistryHandler.register();
 
         initChickenConfigs.loadConfigs();
 
