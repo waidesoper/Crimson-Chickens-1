@@ -5,7 +5,7 @@ import net.minecraft.client.model.ModelPart;
 import net.minecraft.client.render.entity.model.AnimalModel;
 import net.minecraft.entity.Entity;
 
-public class NestChickenModel<T extends Entity> extends AnimalModel<T> {
+public class ChickenNestedModel<T extends Entity> extends AnimalModel<T> {
     public final ModelPart head;
     public final ModelPart body;
     public final ModelPart wing0;
@@ -13,7 +13,7 @@ public class NestChickenModel<T extends Entity> extends AnimalModel<T> {
     public final ModelPart beak;
     public final ModelPart comb;
 
-    public NestChickenModel() {
+    public ChickenNestedModel() {
         this.head = new ModelPart(this, 0, 0);
         this.head.addCuboid(- 2.0F, - 6.0F, - 2.0F, 4.0F, 6.0F, 3.0F, 0.0F);
         this.head.setPivot(0.0F, 15.0F, - 4.0F);

@@ -1,10 +1,12 @@
 package crimsonfluff.crimsonchickens;
 
+import crimsonfluff.crimsonchickens.entity.AngryChickenEntity;
+import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
-import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.fabricmc.api.ModInitializer;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
+import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -17,13 +19,16 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+//  /summon crimsonchickens:blaze_chicken ~ ~ ~ {Age:-24000,analyzed:1,strength:10,gain:10,growth:10}
+//  /summon crimsonchickens:blaze_chicken ~ ~ ~ {analyzed:1,strength:10,gain:10,growth:10}
+
 public class CrimsonChickens implements ModInitializer {
     public static final String MOD_ID = "crimsonchickens";
     public static final Logger LOGGER = LogManager.getLogger(CrimsonChickens.class);
 
 //    public static CrimsonChickensConfig CONFIG;
 
-    public static final ItemGroup CRIMSON_CHICKENS_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "stuff"), () -> new ItemStack(initItems.EGG_DUCK));
+    public static final ItemGroup CREATIVE_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "tab"), () -> new ItemStack(initItems.EGG_DUCK));
 
 
     @Override
@@ -36,9 +41,16 @@ public class CrimsonChickens implements ModInitializer {
         initBlocks.register();
         initTiles.register();
         initSounds.register();
-        RegistryHandler.register();
+        initRegistry.register();
 
         initChickenConfigs.loadConfigs();
+
+        initRegistry.MOD_CHICKENS.forEach((s, resourceChicken) -> {
+            if (s.equals("angry"))
+                FabricDefaultAttributeRegistry.register(resourceChicken, AngryChickenEntity.createChickenAttributes(s));
+            else
+                FabricDefaultAttributeRegistry.register(resourceChicken, ResourceChickenEntity.createChickenAttributes(s));
+        });
 
 //        ModPacketsC2S.register();
     }

@@ -5,7 +5,6 @@ import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.json.Serializers;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.util.Identifier;
 import org.apache.commons.io.filefilter.FileFilterUtils;
@@ -18,11 +17,10 @@ import java.nio.file.*;
 import java.util.stream.Stream;
 
 public class initChickenConfigs {
-    private static final Path MOD_ROOT = FabricLoader.getInstance().getConfigDir();
+    private static final Path MOD_ROOT = FabricLoader.getInstance().getGameDir();
 
     public static void loadConfigs() {
-//        File dir = FMLPaths.CONFIGDIR.get().resolve(CrimsonChickens.MOD_ID).toFile();
-        File dir = FabricLoader.getInstance().getConfigDir().toFile();
+        File dir = FabricLoader.getInstance().getConfigDir().resolve(CrimsonChickens.MOD_ID).toFile();
 
         // copy configs from 'data/crimsonchickens'
         // only set up defaults if 'config/crimsonchickens' folder does not exist
@@ -57,7 +55,7 @@ public class initChickenConfigs {
 
                     chickenData.name = name;
                     ChickenRegistry.getRegistry().registerChicken(name, chickenData);
-                    RegistryHandler.registerChicken(name, chickenData);
+                    initRegistry.registerChicken(name, chickenData);
 
                     chickenData.chickenTexture = new Identifier("crimsonchickens:textures/entity/" + folder + "/" + name + ".png");
                 }

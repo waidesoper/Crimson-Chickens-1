@@ -18,7 +18,7 @@ import net.minecraft.util.math.Vec3d;
 import net.minecraft.world.World;
 
 public class xpItem extends Item {
-    public xpItem() {super(new FabricItemSettings().group(CrimsonChickens.CRIMSON_CHICKENS_TAB).rarity(Rarity.UNCOMMON));}
+    public xpItem() {super(new FabricItemSettings().group(CrimsonChickens.CREATIVE_TAB).rarity(Rarity.UNCOMMON));}
 
     @Override
     public boolean hasGlint(ItemStack itemStack) {return true;}

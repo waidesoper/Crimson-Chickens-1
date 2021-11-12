@@ -5,27 +5,30 @@
   "name": "Crimson Chickens",
   "description": "A Resource Chickens Mod",
   "authors": [
-    "Crimson_Fluff",
-    "SadieWopen"
+    "Crimson_Fluff"
   ],
-  "contact": {},
+  "contact": {
+    "homepage": "https:",
+    "sources": "https:"
+  },
   "license": "GPL-3.0",
-  "icon": "assets/crimsonchickens/icon.png",
+  "icon": "assets/crimsonchickens/logo.png",
   "environment": "*",
   "entrypoints": {
-    "client": [
-      "crimsonfluff.crimsonchickens.client.clientStuff"
-    ],
-    "main": [
-      "crimsonfluff.crimsonchickens.CrimsonChickens"
-    ]
+    "client": ["crimsonfluff.crimsonchickens.client.initClient"],
+    "main": ["crimsonfluff.crimsonchickens.CrimsonChickens"],
+    "rei_plugins": ["crimsonfluff.crimsonchickens.compat.Rei"]
   },
-  "mixins": [
-    "crimsonchickens.mixins.json"
-  ],
+  "mixins": ["crimsonchickens.mixins.json"],
   "depends": {
     "fabricloader": ">=0.12.3",
     "fabric": "*",
     "minecraft": "1.16.5"
+  },
+  "custom": {
+    "waila:plugins": {
+      "id": "crimsonchickens:hwyla",
+      "initializer": "crimsonfluff.crimsonchickens.compat.Waila"
+    }
   }
 }

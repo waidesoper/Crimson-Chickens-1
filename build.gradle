@@ -14,6 +14,14 @@ repositories {
     // for more information about repositories.
 
     maven { url "https://maven.shedaniel.me/" }
+
+    maven {
+        name = "HYWLA"
+        url = "https://maven.tehnut.info/"
+        content {
+            includeGroup "mcp.mobius.waila"
+        }
+    }
 }
 
 dependencies {
@@ -29,6 +37,17 @@ dependencies {
     }
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
+
+    modCompileOnly("me.shedaniel:RoughlyEnoughItems:${rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
+    }
+    modCompileOnly("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {
+        exclude group: "net.fabricmc.fabric-api"
+    }
+    modRuntime("me.shedaniel:RoughlyEnoughItems:${rei_version}") {
+        exclude group: "net.fabricmc.fabric-api"
+    }
+    modRuntime("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {}
 }
 
 processResources {

@@ -14,7 +14,7 @@ import net.minecraft.util.TypedActionResult;
 import net.minecraft.world.World;
 
 public class DuckEgg extends Item {
-    public DuckEgg() {super(new FabricItemSettings().group(CrimsonChickens.CRIMSON_CHICKENS_TAB).maxCount(16));}
+    public DuckEgg() {super(new FabricItemSettings().group(CrimsonChickens.CREATIVE_TAB).maxCount(16));}
 
     public TypedActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
         ItemStack itemstack = playerIn.getStackInHand(handIn);

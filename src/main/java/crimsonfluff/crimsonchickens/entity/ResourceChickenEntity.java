@@ -9,7 +9,7 @@ package crimsonfluff.crimsonchickens.entity;
  **/
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
-import crimsonfluff.crimsonchickens.init.initEntities;
+import crimsonfluff.crimsonchickens.init.initRegistry;
 import crimsonfluff.crimsonchickens.init.initSounds;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
@@ -50,6 +50,7 @@ import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.*;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.explosion.Explosion;
@@ -323,7 +324,7 @@ public class ResourceChickenEntity extends ChickenEntity {
         if (rce != null) {
             // if both chickens are the same... coal and coal, mr duck and mr duck
             if (chickenData.name.equals(rce.chickenData.name)) {
-                if ((newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn)) != null)
+                if ((newChicken = initRegistry.MOD_CHICKENS.get(chickenData.name).create(worldIn)) != null)
                     increaseStats(newChicken, this, rce, worldIn.random);
 
                 return newChicken;
@@ -334,9 +335,9 @@ public class ResourceChickenEntity extends ChickenEntity {
                 // chance of getting either a source duck, or a target duck, in case a mod extends my duck?
                 // or two or more registered ducks (Mr_Duck and Mrs_Duck eg)
                 if (worldIn.random.nextInt(2) == 0)
-                    newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn);
+                    newChicken = initRegistry.MOD_CHICKENS.get(chickenData.name).create(worldIn);
                 else
-                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
+                    newChicken = initRegistry.MOD_CHICKENS.get(rce.chickenData.name).create(worldIn);
 
                 return newChicken;
             }
@@ -347,9 +348,9 @@ public class ResourceChickenEntity extends ChickenEntity {
 
                 // TODO:
 //                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
-//                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
+//                    newChicken = initRegistry.MOD_CHICKENS.get(rce.chickenData.name).create(worldIn);
 //                else
-                    newChicken = initEntities.getModChickens().get("chicken").create(worldIn);
+                    newChicken = initRegistry.MOD_CHICKENS.get("chicken").create(worldIn);
 
                 return newChicken;
 
@@ -359,9 +360,9 @@ public class ResourceChickenEntity extends ChickenEntity {
 
                 // TOOD:
 //                if (r <= CrimsonChickens.CONFIGURATION.allowBreedingWithVanilla.get())
-//                    newChicken = initEntities.getModChickens().get(chickenData.name).create(worldIn);
+//                    newChicken = initRegistry.MOD_CHICKENS.get(chickenData.name).create(worldIn);
 //                else
-                    newChicken = initEntities.getModChickens().get(rce.chickenData.name).create(worldIn);
+                    newChicken = initRegistry.MOD_CHICKENS.get(rce.chickenData.name).create(worldIn);
 
                 return newChicken;
             }
@@ -377,7 +378,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 //                lst.add(rce.chickenData.name);
 //
 //                boolean a, b;
-//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initRegistry.MOD_CHICKENS.entrySet()) {
 //                    String string = entry.getKey();
 //                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(string);
 //
@@ -395,7 +396,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 //                worldIn.playSound(null, this.getBlockPos(), SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.BLOCKS, 1f, 1f);
 //
 //                int r = this.world.random.nextInt(lst.size());
-//                newChicken = initEntities.getModChickens().get(lst.get(r)).get().create(this.world);
+//                newChicken = initRegistry.MOD_CHICKENS.get(lst.get(r)).get().create(this.world);
 //                return newChicken;
 //            }
 
@@ -582,7 +583,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 
         int r = new Random().nextInt(100) + 1;
 //        if (r <= CrimsonChickens.CONFIGURATION.allowDeathDropResource.get())
-//            CrimsonChickens.calcDrops(this.dataTracker.get(GAIN), chickenData, lootingMultiplier).forEach(this::spawnAtLocation);
+            CrimsonChickens.calcDrops(this.dataTracker.get(GAIN), chickenData, lootingMultiplier).forEach(this::dropStack);
     }
 
     @Override
@@ -615,20 +616,20 @@ public class ResourceChickenEntity extends ChickenEntity {
 //    @Override
 //    public void addProbeEntityInfo(ProbeMode mode, IProbeInfo probeInfo, PlayerEntity player, World world, Entity entity, IProbeHitdataTracker data) {
 //        if (this.dataTracker.get(ANALYZED)) {
-//            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.growth", this.dataTracker.get(GROWTH)));
-//            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.gain", this.dataTracker.get(GAIN)));
-//            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.strength", this.dataTracker.get(STRENGTH)));
+//            probeInfo.text(new TranslatableText("tip.crimsonchickens.growth", this.dataTracker.get(GROWTH)));
+//            probeInfo.text(new TranslatableText("tip.crimsonchickens.gain", this.dataTracker.get(GAIN)));
+//            probeInfo.text(new TranslatableText("tip.crimsonchickens.strength", this.dataTracker.get(STRENGTH)));
 //        }
 //
 //        if (! this.isBaby()) {
 //            if (this.chickenData.eggLayTime != 0) {
 //                //int secs = this.eggLayTime / 20;
-//                probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.egg", CrimsonChickens.formatTime(this.eggLayTime)));
+//                probeInfo.text(new TranslatableText("tip.crimsonchickens.egg", CrimsonChickens.formatTime(this.eggLayTime)));
 //            }
 //        }
 //
 //        if (this.conversionCount != 0) {
-//            probeInfo.text(new TranslationTextComponent("tip.crimsonchickens.conv", new TranslationTextComponent(this.conversionDescID)));
+//            probeInfo.text(new TranslatableText("tip.crimsonchickens.conv", new TranslatableText(this.conversionDescID)));
 //            probeInfo.progress(this.conversionCount, this.conversionRequired);
 //        }
 //    }
@@ -660,8 +661,7 @@ public class ResourceChickenEntity extends ChickenEntity {
             this.conversionCount = nbt.getInt("count");
             this.conversionRequired = nbt.getInt("req");
             this.conversionType = nbt.getString("type");
-            // TODO
-//            this.conversionDescID = ForgeRegistries.ITEMS.getValue(new ResourceLocation(this.conversionType)).getDescriptionId();
+            this.conversionDescID = Registry.ITEM.get(new Identifier(this.conversionType)).getTranslationKey();
         }
 
         this.eggLayTime = CrimsonChickens.calcNewEggLayTime(this.random, this.chickenData, this.dataTracker.get(GROWTH));
@@ -774,7 +774,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 //                if (! this.chickenData.name.equals("chicken")) return ActionResult.FAIL;
 //
 //                // loop thru registry and find dropItem that matches item player is holding (itemStack)
-//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initEntities.getModChickens().entrySet()) {
+//                for (Map.Entry<String, RegistryObject<EntityType<? extends ResourceChickenEntity>>> entry : initRegistry.MOD_CHICKENS.entrySet()) {
 //                    String name = entry.getKey();
 //                    ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
 //
@@ -810,7 +810,7 @@ public class ResourceChickenEntity extends ChickenEntity {
 //                            ((ServerWorld) playerIn.world).spawnParticles(ParticleTypes.POOF,
 //                                this.getX(), this.getY() + 0.5, this.getZ(),200, 1, 1, 1, 0);
 //
-//                            ResourceChickenEntity newChick = initEntities.getModChickens().get(chickenData.name).get().create(playerIn.world);
+//                            ResourceChickenEntity newChick = initRegistry.MOD_CHICKENS.get(chickenData.name).get().create(playerIn.world);
 //                            newChick.copyFrom(this);
 //
 //                            if (this.hasCustomName()) {

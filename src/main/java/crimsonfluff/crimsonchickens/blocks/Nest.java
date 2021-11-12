@@ -200,9 +200,7 @@ public class Nest extends Block implements BlockEntityProvider  {
 
             if (te != null) {
                 if (! te.STORED_ITEMS.isEmpty()) {
-                    te.STORED_ITEMS.forEach(item -> {
-                        Block.dropStack(world, pos, item);
-                    });
+                    te.STORED_ITEMS.forEach(item -> { Block.dropStack(world, pos, item); });
                 }
 
                 if (te.entityCaptured != null) {
@@ -210,7 +208,7 @@ public class Nest extends Block implements BlockEntityProvider  {
 
                     if (entity != null) {
                         entity.readNbt(te.entityCaptured);
-                        entity.setPos(pos.getX() + 0.5, pos.getY() + 0.5, pos.getZ() + 0.5);
+                        entity.refreshPositionAndAngles(pos, entity.yaw, entity.pitch); // cant use setPos() !
                         world.spawnEntity(entity);
 
                         world.playSound(null, pos, SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 1f, 1f);

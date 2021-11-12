@@ -1,11 +1,10 @@
 package crimsonfluff.crimsonchickens.entity;
 
 import crimsonfluff.crimsonchickens.client.DuckEggProjectileSpawnPacket;
-import crimsonfluff.crimsonchickens.client.clientStuff;
-import crimsonfluff.crimsonchickens.init.initEntities;
+import crimsonfluff.crimsonchickens.client.initClient;
 import crimsonfluff.crimsonchickens.init.initItems;
+import crimsonfluff.crimsonchickens.init.initRegistry;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
-import crimsonfluff.crimsonchickens.registry.RegistryHandler;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.entity.EntityType;
@@ -31,11 +30,11 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
     }
 
     public DuckEggProjectileEntity(World p_i1780_1_, LivingEntity p_i1780_2_) {
-        super(RegistryHandler.DUCK_EGG, p_i1780_2_, p_i1780_1_);
+        super(initRegistry.DUCK_EGG, p_i1780_2_, p_i1780_1_);
     }
 
     public DuckEggProjectileEntity(World p_i1781_1_, double p_i1781_2_, double p_i1781_4_, double p_i1781_6_) {
-        super(RegistryHandler.DUCK_EGG, p_i1781_2_, p_i1781_4_, p_i1781_6_, p_i1781_1_);
+        super(initRegistry.DUCK_EGG, p_i1781_2_, p_i1781_4_, p_i1781_6_, p_i1781_1_);
     }
 
     // or it will not show break particles
@@ -55,7 +54,7 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
 
     protected void onCollision(HitResult hitResult) {
         super.onCollision(hitResult);
-        if (!this.world.isClient) {
+        if (! this.world.isClient) {
             if (this.random.nextInt(8) == 0) {
                 int i = 1;
                 if (this.random.nextInt(32) == 0) i = 4;
@@ -67,13 +66,14 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
                 });
 
                 if (lst.size() != 0) {
-                    ResourceChickenEntity duck = initEntities.getModChickens()
-                        .get(lst.get(this.random.nextInt(lst.size()))).create(this.world);
+                    ResourceChickenEntity duck = initRegistry.MOD_CHICKENS.get(lst.get(this.random.nextInt(lst.size()))).create(this.world);
 
-                    for (int j = 0; j < i; ++ j) {
-                        duck.setBreedingAge(- 24000);
-                        duck.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.yaw, 0.0F);
-                        this.world.spawnEntity(duck);
+                    if (duck != null) {
+                        for (int j = 0; j < i; ++ j) {
+                            duck.setBreedingAge(- 24000);
+                            duck.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.yaw, 0.0F);
+                            this.world.spawnEntity(duck);
+                        }
                     }
                 }
             }
@@ -91,6 +91,6 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
 
     @Override
     public Packet createSpawnPacket() {
-        return DuckEggProjectileSpawnPacket.create(this, clientStuff.DUCKEGG_SPAWN_PACKET);
+        return DuckEggProjectileSpawnPacket.create(this, initClient.DUCK_EGG_SPAWN_PACKET);
     }
 }
