@@ -128,5 +128,76 @@ public interface ImplementedInventory extends Inventory {
     default boolean canPlayerUse(PlayerEntity player) {
         return true;
     }
+
+
+    default boolean canInsert(ItemStack stack) {
+        boolean bl = false;
+
+        for (ItemStack itemStack : getItems()) {
+            if (itemStack.isEmpty() || this.canCombine(itemStack, stack) && itemStack.getCount() < itemStack.getMaxCount()) {
+                bl = true;
+                break;
+            }
+        }
+
+        return bl;
+    }
+
+    default ItemStack addStack(ItemStack stack) {
+        ItemStack itemStack = stack.copy();
+        this.addToExistingSlot(itemStack);
+        if (itemStack.isEmpty()) {
+            return ItemStack.EMPTY;
+        } else {
+            this.addToNewSlot(itemStack);
+            return itemStack.isEmpty() ? ItemStack.EMPTY : itemStack;
+        }
+    }
+
+    default void addToNewSlot(ItemStack stack) {
+        for(int i = 0; i < getItems().size(); ++i) {
+            ItemStack itemStack = getItems().get(i);
+            if (itemStack.isEmpty()) {
+                getItems().set(i, stack.copy());
+                stack.setCount(0);
+                return;
+            }
+        }
+    }
+
+    default void addToExistingSlot(ItemStack stack) {
+        for(int i = 0; i < getItems().size(); ++i) {
+            ItemStack itemStack = getItems().get(i);
+            if (this.canCombine(itemStack, stack)) {
+                this.transfer(stack, itemStack);
+                if (stack.isEmpty()) return;
+            }
+        }
+    }
+
+    default void addToExistingSlot(ItemStack stack, int slot, boolean isCreative) {
+        ItemStack itemStack = getItems().get(slot);
+        if (itemStack.isEmpty()) {
+            getItems().set(slot, stack.copy());
+            if (! isCreative) stack.decrement(getItems().get(slot).getCount());
+        }
+
+        else if (this.canCombine(itemStack, stack))
+            this.transfer(stack, itemStack);
+    }
+
+    default boolean canCombine(ItemStack one, ItemStack two) {
+        return one.getItem() == two.getItem() && ItemStack.areNbtEqual(one, two);
+    }
+
+    default void transfer(ItemStack source, ItemStack target) {
+        int i = Math.min(this.getMaxCountPerStack(), target.getMaxCount());
+        int j = Math.min(source.getCount(), i - target.getCount());
+        if (j > 0) {
+            target.increment(j);
+            source.decrement(j);
+            this.markDirty();
+        }
+    }
 }
 

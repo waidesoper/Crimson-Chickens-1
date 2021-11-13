@@ -3,7 +3,7 @@
 	"dropItem": "minecraft:bone_meal",
 	"dropItemNBT": "",
 	"spawnNaturally": true,
-	"spawnType": 1,
+	"spawnType": 0,
 	"spawnWeight": 5,
 	"canBreed": true,
 	"baseHealth": 4,

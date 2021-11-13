@@ -16,19 +16,18 @@
   "environment": "*",
   "entrypoints": {
     "client": ["crimsonfluff.crimsonchickens.client.initClient"],
-    "main": ["crimsonfluff.crimsonchickens.CrimsonChickens"],
-    "rei_plugins": ["crimsonfluff.crimsonchickens.compat.Rei"]
+    "main": ["crimsonfluff.crimsonchickens.CrimsonChickens"]
   },
   "mixins": ["crimsonchickens.mixins.json"],
   "depends": {
-    "fabricloader": ">=0.12.3",
+    "fabricloader": ">=0.12.5",
     "fabric": "*",
-    "minecraft": "1.16.5"
+    "minecraft": "1.17.1"
   },
   "custom": {
     "waila:plugins": {
       "id": "crimsonchickens:hwyla",
-      "initializer": "crimsonfluff.crimsonchickens.compat.Waila"
+      "initializer": "crimsonfluff.crimsonchickens.compat.waila.Waila"
     }
   }
 }

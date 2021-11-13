@@ -3,6 +3,7 @@ package crimsonfluff.crimsonchickens.json;
 import com.google.gson.*;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.nbt.StringNbtReader;
 
 import java.lang.reflect.Type;
@@ -56,7 +57,7 @@ public class Serializers {
             if (element != null && element.size() != 0) mt.biomesBlacklist = element;   //.getAsJsonArray();
 
             mt.spawnNaturally = obj.get("spawnNaturally").getAsBoolean();
-            mt.spawnType = obj.get("spawnType").getAsInt();
+            mt.spawnType = obj.get("spawnType").getAsInt() == 0 ? SpawnGroup.MONSTER : SpawnGroup.CREATURE;
             mt.spawnWeight = obj.get("spawnWeight").getAsInt();
 
             mt.parentA = obj.get("parentA").getAsString();
@@ -91,7 +92,7 @@ public class Serializers {
 
             obj.addProperty("spawnNaturally", src.spawnNaturally);
             obj.addProperty("spawnWeight", src.spawnWeight);
-            obj.addProperty("spawnType", src.spawnType);
+            obj.addProperty("spawnType", src.spawnType.ordinal());
 
             obj.addProperty("parentA", src.parentA);
             obj.addProperty("parentB", src.parentB);

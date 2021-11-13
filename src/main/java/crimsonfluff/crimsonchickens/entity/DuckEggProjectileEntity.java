@@ -71,7 +71,7 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
                     if (duck != null) {
                         for (int j = 0; j < i; ++ j) {
                             duck.setBreedingAge(- 24000);
-                            duck.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.yaw, 0.0F);
+                            duck.refreshPositionAndAngles(this.getX(), this.getY(), this.getZ(), this.getYaw(), 0.0F);
                             this.world.spawnEntity(duck);
                         }
                     }
@@ -79,7 +79,7 @@ public class DuckEggProjectileEntity extends ThrownItemEntity implements FlyingI
             }
 
             this.world.sendEntityStatus(this, (byte)3);
-            this.remove();
+            this.remove(RemovalReason.DISCARDED);
         }
     }
 

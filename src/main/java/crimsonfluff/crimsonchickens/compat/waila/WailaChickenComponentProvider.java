@@ -1,4 +1,4 @@
-package crimsonfluff.crimsonchickens.compat;
+package crimsonfluff.crimsonchickens.compat.waila;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;

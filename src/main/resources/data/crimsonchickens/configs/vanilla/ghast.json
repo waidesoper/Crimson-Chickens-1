@@ -3,7 +3,7 @@
 	"dropItem": "minecraft:ghast_tear",
 	"dropItemNBT": "",
 	"spawnNaturally": false,
-	"spawnType": 1,
+	"spawnType": 0,
 	"spawnWeight": 5,
 	"canBreed": true,
 	"baseHealth": 4,

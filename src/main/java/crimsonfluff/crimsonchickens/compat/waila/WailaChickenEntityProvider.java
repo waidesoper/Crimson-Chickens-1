@@ -1,4 +1,4 @@
-package crimsonfluff.crimsonchickens.compat;
+package crimsonfluff.crimsonchickens.compat.waila;
 
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import mcp.mobius.waila.api.IServerDataProvider;

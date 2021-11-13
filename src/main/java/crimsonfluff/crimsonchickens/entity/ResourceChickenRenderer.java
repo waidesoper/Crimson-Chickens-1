@@ -4,8 +4,11 @@ import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import net.fabricmc.api.EnvType;
 import net.fabricmc.api.Environment;
 import net.minecraft.client.render.entity.EntityRenderDispatcher;
+import net.minecraft.client.render.entity.EntityRendererFactory;
 import net.minecraft.client.render.entity.MobEntityRenderer;
 import net.minecraft.client.render.entity.model.ChickenEntityModel;
+import net.minecraft.client.render.entity.model.EntityModelLayer;
+import net.minecraft.client.render.entity.model.EntityModelLayers;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
 
@@ -13,10 +16,9 @@ import net.minecraft.util.math.MathHelper;
 public class ResourceChickenRenderer extends MobEntityRenderer<ResourceChickenEntity, ChickenEntityModel<ResourceChickenEntity>> {
     private final Identifier CHICKEN_TEXTURE;
 
-    public ResourceChickenRenderer(EntityRenderDispatcher renderManagerIn, ResourceChickenData chickenData) {
-        super(renderManagerIn, new ChickenEntityModel<>(), 0.3F);
+    public ResourceChickenRenderer(EntityRendererFactory.Context context, ResourceChickenData chickenData) {
+        super(context, new ChickenEntityModel<>(context.getPart(EntityModelLayers.CHICKEN)), 0.3F);
 
-//        CHICKEN_TEXTURE = new ResourceLocation("crimsonchickens:textures/entity/" + chickenData.name + ".png");
         CHICKEN_TEXTURE = chickenData.chickenTexture;
     }
 

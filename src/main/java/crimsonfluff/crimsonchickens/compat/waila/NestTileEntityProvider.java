@@ -1,4 +1,4 @@
-package crimsonfluff.crimsonchickens.compat;
+package crimsonfluff.crimsonchickens.compat.waila;
 
 import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
 import mcp.mobius.waila.api.IServerDataProvider;
@@ -19,7 +19,7 @@ public class NestTileEntityProvider implements IServerDataProvider<BlockEntity> 
             if (tile.entityCaptured != null) {
                 compoundNBT.putInt("chickenAge", tile.chickenAge);
                 compoundNBT.putInt("eggLayTime", tile.eggLayTime);
-                compoundNBT.putBoolean("requiresSeeds", tile.STORED_ITEMS.get(0).isEmpty());
+                compoundNBT.putBoolean("requiresSeeds", tile.getStack(0).isEmpty());
             }
         }
     }

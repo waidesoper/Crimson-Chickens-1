@@ -1,16 +1,26 @@
 package crimsonfluff.crimsonchickens;
 
+import crimsonfluff.crimsonchickens.config.CrimsonChickensConfig;
 import crimsonfluff.crimsonchickens.entity.AngryChickenEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenEntity;
 import crimsonfluff.crimsonchickens.init.*;
 import crimsonfluff.crimsonchickens.json.ResourceChickenData;
+import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
+import me.shedaniel.autoconfig.AutoConfig;
+import me.shedaniel.autoconfig.serializer.GsonConfigSerializer;
 import net.fabricmc.api.ModInitializer;
+import net.fabricmc.fabric.api.biome.v1.BiomeModifications;
+import net.fabricmc.fabric.api.biome.v1.BiomeSelectors;
+import net.fabricmc.fabric.api.biome.v1.ModificationPhase;
 import net.fabricmc.fabric.api.client.itemgroup.FabricItemGroupBuilder;
 import net.fabricmc.fabric.api.object.builder.v1.entity.FabricDefaultAttributeRegistry;
+import net.minecraft.entity.EntityType;
+import net.minecraft.entity.SpawnGroup;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
+import net.minecraft.util.registry.BuiltinRegistries;
 import net.minecraft.util.registry.Registry;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -19,17 +29,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-//  /summon crimsonchickens:blaze_chicken ~ ~ ~ {Age:-24000,analyzed:1,strength:10,gain:10,growth:10}
-//  /summon crimsonchickens:blaze_chicken ~ ~ ~ {analyzed:1,strength:10,gain:10,growth:10}
+//  /summon crimsonchickens:blaze ~ ~ ~ {Age:-24000,analyzed:1,strength:10,gain:10,growth:10}
+//  /summon crimsonchickens:blaze ~ ~ ~ {analyzed:1,strength:10,gain:10,growth:10}
 
 public class CrimsonChickens implements ModInitializer {
     public static final String MOD_ID = "crimsonchickens";
     public static final Logger LOGGER = LogManager.getLogger(CrimsonChickens.class);
-
-//    public static CrimsonChickensConfig CONFIG;
-
     public static final ItemGroup CREATIVE_TAB = FabricItemGroupBuilder.build(new Identifier(MOD_ID, "tab"), () -> new ItemStack(initItems.EGG_DUCK));
 
+    public static final CrimsonChickensConfig CONFIGURATION = AutoConfig.register(CrimsonChickensConfig.class, GsonConfigSerializer::new).getConfig();
 
     @Override
     public void onInitialize() {
@@ -52,10 +60,46 @@ public class CrimsonChickens implements ModInitializer {
                 FabricDefaultAttributeRegistry.register(resourceChicken, ResourceChickenEntity.createChickenAttributes(s));
         });
 
-//        ModPacketsC2S.register();
+        Identifier id = Registry.ENTITY_TYPE.getId(EntityType.CHICKEN);
+        BuiltinRegistries.BIOME.forEach(biome -> {
+            initRegistry.MOD_CHICKENS.forEach((s, resourceChicken) -> {
+                ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(s);
+
+                if (chickenData.spawnNaturally) {
+                    if (s.equals("chicken")) {
+                        BiomeModifications.addSpawn(BiomeSelectors.categories(biome.getCategory()), SpawnGroup.CREATURE, resourceChicken, chickenData.spawnWeight, 4, 4);
+
+                        BiomeModifications.create(id).add(ModificationPhase.REMOVALS, BiomeSelectors.categories(biome.getCategory()), context -> {
+                            context.getSpawnSettings().removeSpawnsOfEntityType(EntityType.CHICKEN);
+                        });
+
+                    } else {
+                        String biomeString = '"' + biome.toString() + '"';
+
+                        if (chickenData.biomesWhitelist != null) {
+                            if (chickenData.biomesWhitelist.toString().contains(biomeString)) {
+                                //LOGGER.info("BIOME_WHITELIST: " + biomeString + " : " + s);
+
+                                BiomeModifications.addSpawn(BiomeSelectors.categories(biome.getCategory()), chickenData.spawnType, resourceChicken, chickenData.spawnWeight, 1, 4);
+                            }
+
+                        } else if (chickenData.biomesBlacklist != null) {
+                            if (! chickenData.biomesBlacklist.toString().contains(biomeString)) {
+                                //LOGGER.info("BIOME_BLACKLIST: " + biomeString + " : " + s);
+
+                                BiomeModifications.addSpawn(BiomeSelectors.categories(biome.getCategory()), chickenData.spawnType, resourceChicken, chickenData.spawnWeight, 1, 4);
+                            }
+
+                        } else {
+                            //LOGGER.info("BIOME_NATURAL: " + biomeString + " : " + s);
+
+                            BiomeModifications.addSpawn(BiomeSelectors.categories(biome.getCategory()), chickenData.spawnType, resourceChicken, chickenData.spawnWeight, 1, 4);
+                        }
+                    }
+                }
+            });
+        });
     }
-
-
 
     public static int calcNewEggLayTime(Random r, ResourceChickenData rcd, int growth) {
         if (rcd.eggLayTime == 0) return 0;
@@ -80,7 +124,7 @@ public class CrimsonChickens implements ModInitializer {
             ItemStack itemStack = new ItemStack(Registry.ITEM.get(new Identifier(chickenData.dropItemItem)));
 
             if (! itemStack.isEmpty()) {
-                if (chickenData.dropItemNBT != null) itemStack.setTag(chickenData.dropItemNBT.copy());
+                if (chickenData.dropItemNBT != null) itemStack.setNbt(chickenData.dropItemNBT.copy());
                 int dropQuantity = calcDropQuantity(gain) + fortune;
 
                 if (itemStack.isStackable()) {

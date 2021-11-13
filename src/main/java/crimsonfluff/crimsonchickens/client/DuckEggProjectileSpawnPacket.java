@@ -14,16 +14,18 @@ public class DuckEggProjectileSpawnPacket {
     public static Packet<?> create(Entity e, Identifier packetID) {
         if (e.world.isClient)
             throw new IllegalStateException("SpawnPacketUtil.create called on the logical client!");
+
         PacketByteBuf byteBuf = new PacketByteBuf(Unpooled.buffer());
         byteBuf.writeVarInt(Registry.ENTITY_TYPE.getRawId(e.getType()));
         byteBuf.writeUuid(e.getUuid());
-        byteBuf.writeVarInt(e.getEntityId());
+        byteBuf.writeVarInt(e.getId());
 
         PacketBufUtil.writeVec3d(byteBuf, e.getPos());
-        PacketBufUtil.writeAngle(byteBuf, e.pitch);
-        PacketBufUtil.writeAngle(byteBuf, e.yaw);
+        PacketBufUtil.writeAngle(byteBuf, e.getPitch());
+        PacketBufUtil.writeAngle(byteBuf, e.getYaw());
         return ServerPlayNetworking.createS2CPacket(packetID, byteBuf);
     }
+
     public static final class PacketBufUtil {
 
         /**

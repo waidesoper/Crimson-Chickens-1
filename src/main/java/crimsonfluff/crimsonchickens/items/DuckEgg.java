@@ -18,12 +18,12 @@ public class DuckEgg extends Item {
 
     public TypedActionResult<ItemStack> use(World worldIn, PlayerEntity playerIn, Hand handIn) {
         ItemStack itemstack = playerIn.getStackInHand(handIn);
-        worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.PLAYERS, 0.5F, 0.4F / (Item.RANDOM.nextFloat() * 0.4F + 0.8F));
+        worldIn.playSound(null, playerIn.getX(), playerIn.getY(), playerIn.getZ(), SoundEvents.ENTITY_EGG_THROW, SoundCategory.PLAYERS, 0.5F, 0.4F / (worldIn.getRandom().nextFloat() * 0.4F + 0.8F));
 
         if (! worldIn.isClient) {
             DuckEggProjectileEntity eggentity = new DuckEggProjectileEntity(worldIn, playerIn);
             eggentity.setItem(itemstack);
-            eggentity.setProperties(playerIn, playerIn.pitch, playerIn.yaw, 0.0F, 1.5F, 1.0F);
+            eggentity.setProperties(playerIn, playerIn.getPitch(), playerIn.getYaw(), 0.0F, 1.5F, 1.0F);
             worldIn.spawnEntity(eggentity);
         }
 

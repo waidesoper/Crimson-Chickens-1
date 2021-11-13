@@ -1,6 +1,7 @@
 package crimsonfluff.crimsonchickens.client;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
+import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
 import crimsonfluff.crimsonchickens.entity.ResourceChickenRenderer;
 import crimsonfluff.crimsonchickens.init.initBlocks;
 import crimsonfluff.crimsonchickens.init.initRegistry;
@@ -9,11 +10,12 @@ import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.blockrenderlayer.v1.BlockRenderLayerMap;
-import net.fabricmc.fabric.api.client.rendereregistry.v1.BlockEntityRendererRegistry;
-import net.fabricmc.fabric.api.client.rendereregistry.v1.EntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.BlockEntityRendererRegistry;
+import net.fabricmc.fabric.api.client.rendering.v1.EntityRendererRegistry;
 import net.fabricmc.fabric.api.network.ClientSidePacketRegistry;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.render.RenderLayer;
+import net.minecraft.client.render.block.entity.BlockEntityRendererFactory;
 import net.minecraft.client.render.entity.FlyingItemEntityRenderer;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -25,18 +27,17 @@ import net.minecraft.util.registry.Registry;
 import java.util.UUID;
 
 public class initClient implements ClientModInitializer {
-
     public static final Identifier DUCK_EGG_SPAWN_PACKET = new Identifier(CrimsonChickens.MOD_ID, "duck_egg_spawn_packet");
 
     @Override
     public void onInitializeClient() {
-        EntityRendererRegistry.INSTANCE.register(initRegistry.DUCK_EGG, (dispatcher, context) -> new FlyingItemEntityRenderer(dispatcher, context.getItemRenderer()));
+        EntityRendererRegistry.register(initRegistry.DUCK_EGG, FlyingItemEntityRenderer::new);
         BlockRenderLayerMap.INSTANCE.putBlock(initBlocks.NEST_BLOCK, RenderLayer.getCutout());
-        BlockEntityRendererRegistry.INSTANCE.register(initTiles.NEST_BLOCK_TILE, NestRenderer::new);
+        BlockEntityRendererRegistry.register(initTiles.NEST_BLOCK_TILE, NestRenderer::new);
 
-        initRegistry.MOD_CHICKENS.forEach((s, resourceChicken) -> EntityRendererRegistry.INSTANCE.register(resourceChicken, (dispatcher, manager) -> {
+        initRegistry.MOD_CHICKENS.forEach((s, resourceChicken) -> EntityRendererRegistry.register(resourceChicken, (manager) -> {
             ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(s);
-            return new ResourceChickenRenderer(dispatcher, chickenData);
+            return new ResourceChickenRenderer(manager, chickenData);
         }));
 
         receiveEntityPacket();
@@ -62,9 +63,9 @@ public class initClient implements ClientModInitializer {
 
                 entity.updateTrackedPosition(pos);
                 entity.setPos(pos.x, pos.y, pos.z);
-                entity.pitch = pitch;
-                entity.yaw = yaw;
-                entity.setEntityId(entityId);
+                entity.setPitch(pitch);
+                entity.setBodyYaw(yaw);
+                entity.setId(entityId);
                 entity.setUuid(uuid);
 
                 world.addEntity(entityId, entity);

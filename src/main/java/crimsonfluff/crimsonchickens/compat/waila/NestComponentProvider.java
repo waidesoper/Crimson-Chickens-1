@@ -1,4 +1,4 @@
-package crimsonfluff.crimsonchickens.compat;
+package crimsonfluff.crimsonchickens.compat.waila;
 
 import crimsonfluff.crimsonchickens.CrimsonChickens;
 import crimsonfluff.crimsonchickens.blocks.NestTileEntity;
@@ -24,7 +24,7 @@ public class NestComponentProvider implements IComponentProvider {
                 tooltip.add(new LiteralText(tile.entityDescription));
 
                 if (tile.entityCustomName != null)
-                    tooltip.add(tile.entityCustomName);
+                    tooltip.add(new LiteralText('"' + tile.entityCustomName.getString() + '"').formatted(Formatting.ITALIC));
 
                 if (tile.entityCaptured.getBoolean("analyzed")) {
                     tooltip.add(new TranslatableText("tip.crimsonchickens.growth", tile.chickenGrowth));
@@ -36,9 +36,7 @@ public class NestComponentProvider implements IComponentProvider {
                 int eggLayTime = data.getInt("eggLayTime");
                 boolean requiresSeeds = data.getBoolean("requiresSeeds");
 
-                int secs;
                 if (chickenAge < 0) {
-//                    secs = -chickenAge / 20;
                     tooltip.add(new TranslatableText("tip.crimsonchickens.growing", CrimsonChickens.formatTime(-chickenAge)));
 
                 } else {
@@ -47,7 +45,6 @@ public class NestComponentProvider implements IComponentProvider {
 
                     } else {
                         if (eggLayTime != 0) {
-//                            secs = eggLayTime / 20;
                             tooltip.add(new TranslatableText("tip.crimsonchickens.egg", CrimsonChickens.formatTime(eggLayTime)));
                         }
                     }

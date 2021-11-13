@@ -3,7 +3,7 @@
 	"dropItem": "draconicevolution:awakened_draconium_ingot",
 	"dropItemNBT": "",
 	"spawnNaturally": false,
-	"spawnType": 0,
+	"spawnType": 1,
 	"spawnWeight": 10,
 	"canBreed": true,
 	"baseHealth": 4,

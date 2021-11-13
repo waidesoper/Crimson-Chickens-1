@@ -4,7 +4,6 @@ import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.ai.goal.AnimalMateGoal;
-import net.minecraft.entity.ai.goal.FollowTargetGoal;
 import net.minecraft.entity.ai.goal.LookAtEntityGoal;
 import net.minecraft.entity.ai.goal.SwimGoal;
 import net.minecraft.entity.attribute.DefaultAttributeContainer;
@@ -18,7 +17,7 @@ public class AngryChickenEntity extends ResourceChickenEntity {
         super(type, world, chickenData);
     }
 
-    public static DefaultAttributeContainer.Builder  createChickenAttributes(String name) {
+    public static DefaultAttributeContainer.Builder createChickenAttributes(String name) {
         ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenData(name);
 
         return createMobAttributes()
@@ -32,7 +31,7 @@ public class AngryChickenEntity extends ResourceChickenEntity {
     @Override
     protected void initGoals() {
         this.goalSelector.add(1, new SwimGoal(this));
-        this.targetSelector.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
+        //this.targetSelector.add(2, new FollowTargetGoal<>(this, PlayerEntity.class, true));
         this.goalSelector.add(3, new LookAtEntityGoal(this, PlayerEntity.class, 8.0F));
         this.goalSelector.add(4, new AngryChickenGoal(this, 1.3D, true));
         // TODO

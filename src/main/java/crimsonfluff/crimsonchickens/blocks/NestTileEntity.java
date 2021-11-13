@@ -9,24 +9,29 @@ import crimsonfluff.crimsonchickens.json.ResourceChickenData;
 import crimsonfluff.crimsonchickens.registry.ChickenRegistry;
 import net.fabricmc.fabric.api.block.entity.BlockEntityClientSerializable;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.entity.AbstractFurnaceBlockEntity;
 import net.minecraft.block.entity.BlockEntity;
+import net.minecraft.block.entity.BlockEntityTicker;
+import net.minecraft.block.entity.HopperBlockEntity;
 import net.minecraft.inventory.Inventories;
+import net.minecraft.inventory.Inventory;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.nbt.NbtCompound;
-import net.minecraft.network.packet.s2c.play.BlockEntityUpdateS2CPacket;
 import net.minecraft.particle.ItemStackParticleEffect;
 import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
-import net.minecraft.util.Tickable;
 import net.minecraft.util.collection.DefaultedList;
-import org.jetbrains.annotations.Nullable;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.World;
+import net.minecraft.world.chunk.BlockEntityTickInvoker;
 
-public class NestTileEntity extends BlockEntity implements Tickable, ImplementedInventory, BlockEntityClientSerializable {
-    public final DefaultedList<ItemStack> STORED_ITEMS = DefaultedList.ofSize(4, ItemStack.EMPTY);
+public class NestTileEntity extends BlockEntity implements ImplementedInventory, BlockEntityClientSerializable {
+    private final DefaultedList<ItemStack> STORED_ITEMS = DefaultedList.ofSize(4, ItemStack.EMPTY);
 
     @Override
     public DefaultedList<ItemStack> getItems() { return STORED_ITEMS; }
@@ -41,13 +46,13 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
     public int chickenGain;
     public int chickenStrength;
 
-    public NestTileEntity() {
-        super(initTiles.NEST_BLOCK_TILE);
+    public NestTileEntity(BlockPos blockPos, BlockState blockState) {
+        super(initTiles.NEST_BLOCK_TILE, blockPos, blockState);
     }
 
     @Override
-    public void fromTag(BlockState state, NbtCompound compound) {
-        super.fromTag(state, compound);
+    public void readNbt(NbtCompound compound) {
+        super.readNbt(compound);
 
         entityRemove(false);        // reset all fields
 
@@ -72,67 +77,59 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
         if (! this.entityDescription.isEmpty())
             compound.putString("entityDescription", this.entityDescription);
 
-        //CrimsonChickens.LOGGER.info("SaveNBT: " + compound);
+//        CrimsonChickens.LOGGER.info("SaveNBT: " + compound);
 
         return super.writeNbt(compound);
     }
 
-    @Override
-    public void tick() {
-        if (this.world.isClient) return;
-        if (this.entityCaptured == null) return;
-        if (this.chickenData.eggLayTime == 0) return;
+// Note: Now called from the Block(Nest) not the TileEntity
+    public static void tick(World world, BlockPos pos, BlockState state, NestTileEntity blockEntity) {
+        if (world.isClient) return;
+        if (blockEntity.entityCaptured == null) return;
+        if (blockEntity.chickenData.eggLayTime == 0) return;
 
-        if (this.chickenAge < 0) {
-            this.chickenAge++;
+        if (blockEntity.chickenAge < 0) {
+            blockEntity.chickenAge++;
             //chickenAge = calcNewAge(chickenAge, compound.getInt("strength"));
 
-            if (this.chickenAge >= 0) {
-                this.world.playSound(null, pos,
-                    this.world.random.nextInt(2) == 0
+            if (blockEntity.chickenAge >= 0) {
+                world.playSound(null, pos,
+                    world.random.nextInt(2) == 0
                         ? SoundEvents.ENTITY_CHICKEN_EGG
-                        : this.chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT : SoundEvents.ENTITY_CHICKEN_AMBIENT
+                        : blockEntity.chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT : SoundEvents.ENTITY_CHICKEN_AMBIENT
                     , SoundCategory.PLAYERS, 1f, 1f);
 
-                ((ServerWorld) this.world).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.NEST_BLOCK_ITEM)),
+                ((ServerWorld) world).spawnParticles(new ItemStackParticleEffect(ParticleTypes.ITEM, new ItemStack(initItems.NEST_BLOCK_ITEM)),
                     pos.getX() + 0.5, pos.getY() + 0.2, pos.getZ() + 0.5,
                     20, 0.3, 0.2, 0.3, 0);
 
-                this.entityCaptured.putInt("Age", this.chickenAge);       // Force Block Update
-                sendUpdates();                                            // Force Block Update
+                blockEntity.entityCaptured.putInt("Age", blockEntity.chickenAge);       // Force Block Update
+                blockEntity.sendUpdates();                                            // Force Block Update
 
-                this.eggLayTime = CrimsonChickens.calcNewEggLayTime(this.world.random, this.chickenData, this.chickenGrowth);
+                blockEntity.eggLayTime = CrimsonChickens.calcNewEggLayTime(world.random, blockEntity.chickenData, blockEntity.chickenGrowth);
             }
         }
 
-        if (this.chickenAge >= 0) {
-            if (! this.STORED_ITEMS.get(0).isEmpty()) {
-                this.eggLayTime--;
+        if (blockEntity.chickenAge >= 0) {
+            if (! blockEntity.getStack(0).isEmpty()) {
+                blockEntity.eggLayTime--;
 
-                if (this.eggLayTime == 0) {
-                    this.eggLayTime = CrimsonChickens.calcNewEggLayTime(this.world.random, this.chickenData, this.chickenGrowth);
-                    this.STORED_ITEMS.get(0).decrement(1);
+                if (blockEntity.eggLayTime == 0) {
+                    blockEntity.eggLayTime = CrimsonChickens.calcNewEggLayTime(world.random, blockEntity.chickenData, blockEntity.chickenGrowth);
+                    blockEntity.getStack(0).decrement(1);
 
-                    // dont allow mods to use this.storedItems as an inventory
-                    // so isValidItem returns false
-                    // but we need to put items into this.storedItems
+                    // note: dont allow mods to use this.storedItems as an inventory
+                    // so isValidItem returns false, but we need to put items into this.storedItems
 
-// TODO:
-//                    CrimsonChickens.calcDrops(this.chickenGain, this.chickenData, 0)
-//                        .forEach(this.STORED_ITEMS::insertItemAnySlot);
-//
-//                    // try to push items into inventory below, not seeds (slot(0))
-//                    if (getOutputItemHandlerCached().isPresent()) {
-//                        for (int slot = 1; slot < this.STORED_ITEMS.size(); slot++) {
-//                            int finalSlot = slot;
-//                            ItemStack result = getOutputItemHandlerCached()
-//                                .map(iItemHandler -> ItemHandlerHelper.insertItemStacked(iItemHandler,
-//                                    this.STORED_ITEMS.get(finalSlot), false))
-//                                .orElse(ItemStack.EMPTY);
-//
-//                            this.STORED_ITEMS.set(slot, result);
-//                        }
-//                    }
+                    CrimsonChickens.calcDrops(blockEntity.chickenGain, blockEntity.chickenData, 0)
+                        .forEach(blockEntity::addStack);
+
+                    Inventory outputINV = HopperBlockEntity.getInventoryAt(world, pos.down());
+                    if (outputINV != null) {
+                        for (int a = 1; a < blockEntity.getItems().size(); a++) {       // slots 1 to 3
+                            HopperBlockEntity.transfer(blockEntity, outputINV, blockEntity.removeStack(a) , null);
+                        }
+                    }
 
                     // if rendering items in Nest update the NestRenderer
 //                    if (CrimsonChickens.CONFIGURATION.renderItems.get()) sendUpdates();
@@ -213,8 +210,13 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
     }
 
     @Override
-    public void fromClientTag(NbtCompound tag) {
-        fromTag(getCachedState(), tag);
+    public void fromClientTag(NbtCompound compound) {
+        entityRemove(false);        // reset all fields
+
+        Inventories.readNbt(compound, STORED_ITEMS);
+
+        if (compound.contains("entityCaptured"))
+            entitySet(compound.getCompound("entityCaptured"), compound.getString("entityDescription"), false);
     }
 
     @Override
@@ -230,8 +232,30 @@ public class NestTileEntity extends BlockEntity implements Tickable, Implemented
 
         //CrimsonChickens.LOGGER.info("getUpdateTagNBT: " + compound);
 
-        //sendUpdates();
-
         return compound;
+    }
+
+    @Override
+    public boolean isValid(int slot, ItemStack stack) {
+        if (slot == 0) {
+            Item item = stack.getItem();
+            return item == Items.WHEAT_SEEDS || item == Items.BEETROOT_SEEDS || item == Items.MELON_SEEDS || item == Items.PUMPKIN_SEEDS;
+        }
+
+        return false;
+    }
+
+    @Override
+    public ItemStack removeStack(int slot) {
+        if (slot == 0) return ItemStack.EMPTY;
+
+        return ImplementedInventory.super.removeStack(slot);
+    }
+
+    @Override
+    public ItemStack removeStack(int slot, int count) {
+        if (slot == 0) return ItemStack.EMPTY;
+
+        return ImplementedInventory.super.removeStack(slot, count);
     }
 }

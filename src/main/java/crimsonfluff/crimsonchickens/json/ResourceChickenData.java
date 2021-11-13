@@ -1,6 +1,8 @@
 package crimsonfluff.crimsonchickens.json;
 
 import com.google.gson.JsonArray;
+import net.minecraft.entity.SpawnGroup;
+import net.minecraft.item.Item;
 import net.minecraft.nbt.NbtCompound;
 import net.minecraft.util.Identifier;
 
@@ -20,20 +22,19 @@ public class ResourceChickenData {
     public int eggSecondaryColor;
 
     // 0= nothing, 1= duck, 2= teleport on damage, 3= explode when killed, 4= give thorns damage, 5 = give fire damage
-    // 6= glass sounds, 7= ghast sounds, 8= bone sounds
+    // 6= glass sounds, 7= ghast sounds, 8= bone sounds, 9= poison/radiation sounds
     public int hasTrait = 0;
 
     public NbtCompound dropItemNBT = null;      // cache the actual NBT
-    //    public Item dropItemItem = null;            // cache the actual item
     public String dropItemItem = "";            // cant cache because FMLCommonSetUp is too late to register chickens
-    // and modded items may not exist yet
+                                                // and modded items may not exist yet
 
     public JsonArray biomesWhitelist = null;
     public JsonArray biomesBlacklist = null;
     public boolean spawnNaturally = false;
 
     // spawning in the Nether has better chance if its of type Monster !
-    public int spawnType = 0;                        // 0=CREATURE, 1=MONSTER
+    public SpawnGroup spawnType;                        // 0=MONSTER, 1=CREATURE    - corrected from Forge version - config changes
     public int spawnWeight = 15;
 
     public ResourceChickenData() {}
@@ -57,7 +58,7 @@ public class ResourceChickenData {
 
 
     // TODO: SpawnEggs
-//    private transient RegistryObject<Item> spawnEggItemRegistryObject;
+    public Item spawnEggItem;
 //    public RegistryObject<Item> getSpawnEggItemRegistryObject() {
 //        return spawnEggItemRegistryObject;
 //    }

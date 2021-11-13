@@ -36,8 +36,8 @@ public class xpItem extends Item {
             vec.x, playerIn.getEyeY(), vec.z, 20, 0.5f, 0.5f, 0.5f, 0);
 
         if (playerIn.isSneaking()) {
-            for (int a = 0; a < playerIn.inventory.size(); a++) {
-                stack = playerIn.inventory.getStack(a);
+            for (int a = 0; a < playerIn.getInventory().size(); a++) {
+                stack = playerIn.getInventory().getStack(a);
 
                 if (stack.getItem() == initItems.XP_ITEM) {
                     //isAmount += stack.getCount();

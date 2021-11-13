@@ -3,7 +3,7 @@
 	"dropItem": "minecraft:blaze_rod",
 	"dropItemNBT": "{display:{Name:'[{\"text\":\"Hot Rods\"}]'}}",
 	"spawnNaturally": true,
-	"spawnType": 1,
+	"spawnType": 0,
 	"spawnWeight": 5,
 	"canBreed": true,
 	"baseHealth": 4,

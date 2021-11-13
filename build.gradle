@@ -15,14 +15,16 @@ repositories {
 
     maven { url "https://maven.shedaniel.me/" }
 
-    maven {
-        name = "HYWLA"
-        url = "https://maven.tehnut.info/"
-        content {
-            includeGroup "mcp.mobius.waila"
-        }
-    }
-}
+//    maven {
+//        name = "HYWLA"
+//        url = "https://maven.tehnut.info/"
+//        content {
+//            includeGroup "mcp.mobius.waila"
+//        }
+//    }
+
+  maven { url "https://maven.bai.lol" }
+  }
 
 dependencies {
     // To change the versions see the gradle.properties file
@@ -38,16 +40,17 @@ dependencies {
     // PSA: Some older mods, compiled on Loom 0.2.1, might have outdated Maven POMs.
     // You may need to force-disable transitiveness on them.
 
-    modCompileOnly("me.shedaniel:RoughlyEnoughItems:${rei_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
-    modCompileOnly("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
-    modRuntime("me.shedaniel:RoughlyEnoughItems:${rei_version}") {
-        exclude group: "net.fabricmc.fabric-api"
-    }
-    modRuntime("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {}
+//    modCompileOnly("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {
+//        exclude group: "net.fabricmc.fabric-api"
+//    }
+    //modRuntime("mcp.mobius.waila:Hwyla:1.16.2-1.9.23-79") {}
+
+
+    modCompileOnly "me.shedaniel:RoughlyEnoughItems-api-fabric:${rei_version}"
+    modRuntimeOnly "me.shedaniel:RoughlyEnoughItems-fabric:${rei_version}"
+
+    modCompileOnly "mcp.mobius.waila:wthit-api:fabric-${wthitVersion}"
+    modRuntime "mcp.mobius.waila:wthit:fabric-${wthitVersion}"
 }
 
 processResources {

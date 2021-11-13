@@ -23,7 +23,6 @@ import net.minecraft.particle.ParticleTypes;
 import net.minecraft.server.world.ServerWorld;
 import net.minecraft.sound.SoundCategory;
 import net.minecraft.sound.SoundEvents;
-import net.minecraft.text.LiteralText;
 import net.minecraft.text.Text;
 import net.minecraft.text.TranslatableText;
 import net.minecraft.util.ActionResult;
@@ -63,7 +62,7 @@ public class AnimalNet extends Item {
 
         // Moved damage to when releasing chicken, to avoid 1 durability break when picking up chicken
 
-        NbtCompound compoundStack = itemStack.getOrCreateTag();
+        NbtCompound compoundStack = itemStack.getOrCreateNbt();
         NbtCompound compound = new NbtCompound();
         entityIn.saveNbt(compound);
 
@@ -82,7 +81,7 @@ public class AnimalNet extends Item {
         playerIn.world.playSound(null, playerIn.getBlockPos(), SoundEvents.ENTITY_PLAYER_ATTACK_SWEEP, SoundCategory.PLAYERS, 1f, 1f);
         playerIn.spawnSweepAttackParticles();
 
-        entityIn.remove();
+        entityIn.remove(Entity.RemovalReason.DISCARDED);
         return ActionResult.SUCCESS;
     }
 
@@ -91,7 +90,7 @@ public class AnimalNet extends Item {
         if (context.getPlayer() == null) return super.useOnBlock(context);       // in case a mob can use items?
         if (context.getPlayer().world.isClient) return super.useOnBlock(context);
 
-        NbtCompound compound = context.getStack().getSubTag("entityCaptured");
+        NbtCompound compound = context.getStack().getSubNbt("entityCaptured");
 
         if (context.getWorld().getBlockState(context.getBlockPos()).getBlock() == initBlocks.NEST_BLOCK) {
             NestTileEntity te = (NestTileEntity) context.getWorld().getBlockEntity(context.getBlockPos());
@@ -100,10 +99,10 @@ public class AnimalNet extends Item {
             if (te.entityCaptured != null && compound == null) {
                 // extract chicken from nest
 
-                context.getStack().getOrCreateTag().putInt("CustomModelData", 1);
+                context.getStack().getOrCreateNbt().putInt("CustomModelData", 1);
                 te.entityCaptured.putInt("EggLayTime", te.eggLayTime);
-                context.getStack().getOrCreateTag().put("entityCaptured", te.entityCaptured);
-                context.getStack().getOrCreateTag().putString("entityDescription", te.entityDescription);
+                context.getStack().getNbt().put("entityCaptured", te.entityCaptured);
+                context.getStack().getNbt().putString("entityDescription", te.entityDescription);
 
                 te.entityRemove(true);
 
@@ -116,7 +115,7 @@ public class AnimalNet extends Item {
                 // Make sure it's a resource chicken.  Sheep dont like the stasis chamber
                 String s = compound.getString("id");
                 if (s.startsWith("crimsonchickens:")) {
-                    te.entitySet(compound, context.getStack().getOrCreateTag().getString("entityDescription"), true);
+                    te.entitySet(compound, context.getStack().getOrCreateNbt().getString("entityDescription"), true);
 
                     ResourceChickenData chickenData = ChickenRegistry.getRegistry().getChickenDataFromID(s);
                     context.getWorld().playSound(null, context.getPlayer().getBlockPos(),
@@ -125,9 +124,9 @@ public class AnimalNet extends Item {
                             : chickenData.hasTrait == 1 ? initSounds.DUCK_AMBIENT : SoundEvents.ENTITY_CHICKEN_AMBIENT
                         , SoundCategory.PLAYERS, 1f, 1f);
 
-                    context.getStack().removeSubTag("entityCaptured");
-                    context.getStack().removeSubTag("entityDescription");
-                    context.getStack().removeSubTag("CustomModelData");        // used to change item texture
+                    context.getStack().removeSubNbt("entityCaptured");
+                    context.getStack().removeSubNbt("entityDescription");
+                    context.getStack().removeSubNbt("CustomModelData");        // used to change item texture
 
                     context.getStack().damage(1, context.getPlayer(), plyr -> plyr.sendToolBreakStatus(context.getHand()));
                 }
@@ -152,12 +151,12 @@ public class AnimalNet extends Item {
             if (context.getSide() != Direction.UP) pos.add(0, 0.5, 0);
 
             entity.readNbt(compound);
-            entity.refreshPositionAndAngles(pos, entity.yaw, entity.pitch);  // cant use setPos() !
+            entity.refreshPositionAndAngles(pos, entity.getYaw(), entity.getPitch());  // cant use setPos() !
             context.getWorld().spawnEntity(entity);
 
-            context.getStack().removeSubTag("entityCaptured");
-            context.getStack().removeSubTag("entityDescription");
-            context.getStack().removeSubTag("CustomModelData");
+            context.getStack().removeSubNbt("entityCaptured");
+            context.getStack().removeSubNbt("entityDescription");
+            context.getStack().removeSubNbt("CustomModelData");
 
             context.getWorld().playSound(null, context.getPlayer().getBlockPos(), SoundEvents.ENTITY_CHICKEN_EGG, SoundCategory.PLAYERS, 1f, 1f);
             context.getStack().damage(1, context.getPlayer(), plyr -> plyr.sendToolBreakStatus(context.getHand()));
@@ -172,9 +171,9 @@ public class AnimalNet extends Item {
     public void appendTooltip(ItemStack itemStack, @Nullable World worldIn, List<Text> tooltip, TooltipContext context) {
         super.appendTooltip(itemStack, worldIn, tooltip, context);
 
-        NbtCompound compound = itemStack.getSubTag("entityCaptured");
+        NbtCompound compound = itemStack.getSubNbt("entityCaptured");
         if (compound != null) {
-            tooltip.add(new TranslatableText(itemStack.getOrCreateTag().getString("entityDescription")));
+            tooltip.add(new TranslatableText(itemStack.getOrCreateNbt().getString("entityDescription")));
 
             if (compound.contains("CustomName", 8))
                 tooltip.add(Text.Serializer.fromJson(compound.getString("CustomName")).formatted(Formatting.ITALIC));
